@@ -1,11 +1,9 @@
 __kernel void planeIntersect(const float2 frameSize, const float4 e,
-                             const float fov_rad, __global const int *elemIds,
+                             const float fov_rad, __global float4 *hitNormals,
+                             __global float4 *hitPoints, __global int *hitMap,
+                             __global const int *elemIds,
                              __global const float4 *planePos,
-                             __global const float4 *planeNormals,
-                             const uint nElems,
-                             __global float4 *hitNormals,
-                             __global float4 *hitPoints,
-                             __global int *hitMap) {
+                             __global const float4 *planeNormals) {
   int gid = get_global_id(0);
 
   int px = gid % (int)frameSize.x;
@@ -34,25 +32,21 @@ __kernel void planeIntersect(const float2 frameSize, const float4 e,
   float4 n = (float4)(0);
   float4 p = (float4)(0);
 
-  float tMin = 0;
+  int i = get_global_id(1);
 
-  // evaluate intersection for each sphere
-  for (int i = 0; i < nElems; i++) {
-    float4 pPos = planePos[i];
-    float4 pNorm = normalize(planeNormals[i]);
+  float4 pPos = planePos[i];
+  float4 pNorm = normalize(planeNormals[i]);
 
-    float den = dot(rd, pNorm);
+  float den = dot(rd, pNorm);
 
-    if (den > 0) {
-      float t = dot(pPos - e, pNorm) / den;
+  if (den > 0) {
+    float t = dot(pPos - e, pNorm) / den;
 
-      // if (t >= 0 && (hitId < 0 || t < tMin)) {
-      if (hitId < 0 || t < tMin) {
-        p = e + t * rd;
-        n = -pNorm;           // this should be pNorm!
-        hitId = elemIds[i];
-        tMin = t;
-      }
+    // if (t >= 0 && (hitId < 0 || t < tMin)) {
+    if (hitId < 0) {
+      p = e + t * rd;
+      n = -pNorm; // this should be pNorm!
+      hitId = elemIds[i];
     }
   }
 

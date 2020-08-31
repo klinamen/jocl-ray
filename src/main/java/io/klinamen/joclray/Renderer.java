@@ -38,6 +38,8 @@ public class Renderer implements Closeable {
     }
 
     public void render(Scene scene, BufferedImage outImage) {
+        long startTime = System.nanoTime();
+
         int nPixels = getPixels(scene);
         float[] imageBuffer = new float[nPixels * FloatVec4.DIM];
 
@@ -50,6 +52,10 @@ public class Renderer implements Closeable {
         // Shading
         OpenCLBlinnPhongShader shader = new OpenCLBlinnPhongShader(context, queue);
         shader.process(scene, intersectResult, imageBuffer);
+
+        long elapsed = System.nanoTime() - startTime;
+
+        System.out.println("Elapsed time: " + elapsed/1000000 + " ms");
 
         // update image
         new ShadingDisplay(scene, imageBuffer).update(outImage);

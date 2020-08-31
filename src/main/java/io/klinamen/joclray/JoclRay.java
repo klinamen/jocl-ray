@@ -9,7 +9,6 @@ import io.klinamen.joclray.scene.Scene;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 
 public class JoclRay {
     BufferedImage image;
@@ -64,17 +63,15 @@ public class JoclRay {
                 .setFrameWidth(image.getWidth())
                 .setFrameHeight(image.getHeight())
                 .setFovGrad(60)
-//                .setPosition(new FloatVec4(-3, 6, 0))
-//                .setDistance(1000)
         )
                 .add(new PointLight()
                         .setIntensity(1f)
-                        .setPosition(new FloatVec4(-10, 10, 20))
+                        .setPosition(new FloatVec4(-5, 20, 20))
                 )
-//                .addLight(new PointLight()
-//                        .setIntensity(0.5f)
-//                        .setPosition(new FloatVec4(-10, -10, -50))
-//                )
+                .add(new PointLight()
+                        .setIntensity(1f)
+                        .setPosition(new FloatVec4(5, 5, 20))
+                )
                 .add(new Sphere()
                         .setCenter(new FloatVec4(0, 0, -30))
                         .setRadius(10)
@@ -103,8 +100,6 @@ public class JoclRay {
         try (Renderer renderer = new Renderer()) {
 //            renderer.cast(scene, image);
             renderer.render(scene, image);
-        } catch (IOException e) {
-            throw new RuntimeException(String.format("Error closing renderer: %s", e.getMessage()), e);
         }
     }
 }
