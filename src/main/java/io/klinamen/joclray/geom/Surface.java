@@ -5,6 +5,7 @@ import io.klinamen.joclray.FloatVec4;
 public abstract class Surface {
     private FloatVec4 kd = new FloatVec4();
     private FloatVec4 ks = new FloatVec4();
+    private FloatVec4 kr = new FloatVec4();
     private float phongExp;
 
     public FloatVec4 getKd() {
@@ -22,6 +23,15 @@ public abstract class Surface {
 
     public Surface setKs(FloatVec4 ks) {
         this.ks = ks;
+        return this;
+    }
+
+    public FloatVec4 getKr() {
+        return kr;
+    }
+
+    public Surface setKr(FloatVec4 kr) {
+        this.kr = kr;
         return this;
     }
 

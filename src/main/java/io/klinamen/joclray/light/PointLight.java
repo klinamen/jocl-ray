@@ -24,3 +24,4 @@ public class PointLight {
         return this;
     }
 }
+

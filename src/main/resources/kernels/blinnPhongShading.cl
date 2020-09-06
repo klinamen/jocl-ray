@@ -19,6 +19,8 @@ blinnPhongShading(__global const int *hitMap,
 
   for (int i = 0; i < nLights; i++) {
     float4 l = normalize(lightPos[i]);
+
+    // diffusion
     c += kds[hitElementId] * lightIntensity[i] * max((float)0, dot(n, l));
 
     float4 h = (e + l) / length(e + l);

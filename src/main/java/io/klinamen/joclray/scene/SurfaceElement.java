@@ -10,6 +10,11 @@ public class SurfaceElement<T extends Surface> extends Element {
         this.surface = surface;
     }
 
+    public SurfaceElement(int id, String name, T surface) {
+        super(id, name);
+        this.surface = surface;
+    }
+
     public T getSurface() {
         return surface;
     }

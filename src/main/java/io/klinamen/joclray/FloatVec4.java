@@ -38,4 +38,28 @@ public class FloatVec4 {
     public float getW() {
         return v[3];
     }
+
+    public FloatVec4 sum(FloatVec4 v1) {
+        return new FloatVec4(getX() + v1.getX(), getY() + v1.getY(), getZ() + v1.getZ(), getW() + v1.getW());
+    }
+
+    public FloatVec4 mul(float s) {
+        return new FloatVec4(s * getX(), s * getY(), s * getZ(), s * getW());
+    }
+
+    public FloatVec4 minus(FloatVec4 v1) {
+        return new FloatVec4(getX() - v1.getX(), getY() - v1.getY(), getZ() - v1.getZ(), getW() - v1.getW());
+    }
+
+    public float length() {
+        return (float) Math.sqrt(getX() * getX() + getY() * getY() + getZ() * getZ() + getW() * getW());
+    }
+
+    public static FloatVec4 extract(float[] aValues, int offset) {
+        if (aValues.length - offset < FloatVec4.DIM) {
+            throw new IllegalArgumentException("Input array length exceeded.");
+        }
+
+        return new FloatVec4(aValues[offset], aValues[offset + 1], aValues[offset + 2], aValues[offset + 3]);
+    }
 }

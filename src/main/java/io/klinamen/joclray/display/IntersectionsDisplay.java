@@ -1,7 +1,7 @@
 package io.klinamen.joclray.display;
 
-import io.klinamen.joclray.IntersectResult;
 import io.klinamen.joclray.geom.Surface;
+import io.klinamen.joclray.kernels.intersection.IntersectResult;
 import io.klinamen.joclray.scene.ElementSet;
 import io.klinamen.joclray.scene.Scene;
 import io.klinamen.joclray.scene.SurfaceElement;

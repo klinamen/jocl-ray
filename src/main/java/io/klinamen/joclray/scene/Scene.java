@@ -1,6 +1,7 @@
 package io.klinamen.joclray.scene;
 
 import com.google.common.collect.ImmutableSortedMap;
+import io.klinamen.joclray.FloatVec4;
 import io.klinamen.joclray.geom.Surface;
 import io.klinamen.joclray.light.PointLight;
 
@@ -10,6 +11,9 @@ import java.util.function.Function;
 
 public class Scene {
     private final Camera camera;
+
+    private float ambientLightIntensity = 0;
+    private FloatVec4 origin = new FloatVec4();
 
     int nextId = 0;
     private final SortedMap<Integer, Element> elements = new TreeMap<>(Integer::compare);
@@ -27,7 +31,15 @@ public class Scene {
         return add(new SurfaceElement<>(nextId, surface));
     }
 
+    public <T extends Surface> Scene add(String name, T surface){
+        return add(new SurfaceElement<>(nextId, name, surface));
+    }
+
     public Scene add(PointLight light){
+        return add(new LightElement(elements.size(), light));
+    }
+
+    public Scene add(String name, PointLight light){
         return add(new LightElement(elements.size(), light));
     }
 
@@ -59,5 +71,23 @@ public class Scene {
 
     public Camera getCamera() {
         return camera;
+    }
+
+    public FloatVec4 getOrigin() {
+        return origin;
+    }
+
+    public Scene setOrigin(FloatVec4 origin) {
+        this.origin = origin;
+        return this;
+    }
+
+    public float getAmbientLightIntensity() {
+        return ambientLightIntensity;
+    }
+
+    public Scene setAmbientLightIntensity(float ambientLightIntensity) {
+        this.ambientLightIntensity = ambientLightIntensity;
+        return this;
     }
 }

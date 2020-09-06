@@ -10,6 +10,11 @@ public class LightElement extends Element {
         this.light = light;
     }
 
+    public LightElement(int id, String name, PointLight light) {
+        super(id, name);
+        this.light = light;
+    }
+
     public PointLight getLight() {
         return light;
     }
