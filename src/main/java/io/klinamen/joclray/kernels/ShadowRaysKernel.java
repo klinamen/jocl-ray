@@ -1,6 +1,6 @@
 package io.klinamen.joclray.kernels;
 
-import io.klinamen.joclray.OpenCLUtils;
+import io.klinamen.joclray.util.OpenCLUtils;
 import org.jocl.*;
 
 import static org.jocl.CL.*;

@@ -1,6 +1,6 @@
 package io.klinamen.joclray.scene;
 
-import io.klinamen.joclray.FloatVec4;
+import io.klinamen.joclray.util.FloatVec4;
 
 public class Camera {
     private float fovGrad = 90;
@@ -51,6 +51,10 @@ public class Camera {
 
     public int getPixelIndex(float xPerc, float yPerc){
         return (int)(getFrameWidth() * xPerc) + (int)(getFrameHeight() * yPerc) * (int)(getFrameWidth());
+    }
+
+    public int getPixels() {
+        return (int)getFrameWidth() * (int) getFrameHeight();
     }
 
     public FloatVec4 getTo() {

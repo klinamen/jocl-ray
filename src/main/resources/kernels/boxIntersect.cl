@@ -29,7 +29,7 @@ boxIntersect(__global float4 *rayOrigins, __global float4 *rayDirections,
 
         float4 hit = rayOrigin + t * rd;
 
-        // normal (https://blog.johnnovak.net/2016/10/22/the-nim-raytracer-project-part-4-calculating-box-normals/)
+        // normals (https://blog.johnnovak.net/2016/10/22/the-nim-raytracer-project-part-4-calculating-box-normals/)
         float4 c = (v0 + v1) / 2;
         float4 p = hit - c;
         float4 d = (v0 - v1) / 2;

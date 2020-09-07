@@ -1,7 +1,5 @@
 package io.klinamen.joclray.kernels.shading;
 
-import io.klinamen.joclray.FloatVec4;
-import io.klinamen.joclray.OpenCLUtils;
 import io.klinamen.joclray.geom.Surface;
 import io.klinamen.joclray.kernels.RaysBuffers;
 import io.klinamen.joclray.kernels.intersection.IntersectionKernelBuffers;
@@ -11,6 +9,8 @@ import io.klinamen.joclray.scene.ElementSet;
 import io.klinamen.joclray.scene.LightElement;
 import io.klinamen.joclray.scene.Scene;
 import io.klinamen.joclray.scene.SurfaceElement;
+import io.klinamen.joclray.util.FloatVec4;
+import io.klinamen.joclray.util.OpenCLUtils;
 import org.jocl.*;
 
 import java.util.Arrays;

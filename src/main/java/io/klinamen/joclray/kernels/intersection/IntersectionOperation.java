@@ -47,14 +47,14 @@ public class IntersectionOperation implements OpenCLKernel<IntersectionOperation
     }
 
     private AbstractIntersectionKernel<?> getKernel(Class<? extends Surface> surfaceType){
-        if(!kernelsCache.containsKey(surfaceType)){
+//        if(!kernelsCache.containsKey(surfaceType)){
             ElementSet<SurfaceElement<Surface>> surfaces = surfacesGroups.get(surfaceType);
             AbstractIntersectionKernel<?> kernel = factory.getKernel(surfaceType);
             IntersectionKernelParams kernelParams = new IntersectionKernelParams(surfaces, this.params.getIntersectionKernelBuffers(), this.params.getRaysBuffers());
             kernel.setParams(kernelParams);
 
             kernelsCache.put(surfaceType, kernel);
-        }
+//        }
 
         return kernelsCache.get(surfaceType);
     }

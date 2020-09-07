@@ -17,7 +17,11 @@ public class ShadingOperation implements OpenCLOperation {
     @Override
     public void enqueue(cl_command_queue queue) {
         for (int i = 0; i < bounces + 1; i++) {
-            intersection.enqueue(queue);
+            if(i > 0) {
+                // TODO make it configurable
+                // skip first intersection
+                intersection.enqueue(queue);
+            }
             shading.enqueue(queue);
         }
     }

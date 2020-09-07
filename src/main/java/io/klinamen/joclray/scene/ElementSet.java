@@ -1,6 +1,6 @@
 package io.klinamen.joclray.scene;
 
-import io.klinamen.joclray.FloatVec4;
+import io.klinamen.joclray.util.FloatVec4;
 
 import java.util.*;
 import java.util.function.Consumer;

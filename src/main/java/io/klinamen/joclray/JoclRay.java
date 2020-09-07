@@ -5,8 +5,11 @@ import io.klinamen.joclray.geom.Plane;
 import io.klinamen.joclray.geom.Sphere;
 import io.klinamen.joclray.light.PointLight;
 import io.klinamen.joclray.light.SpotLight;
+import io.klinamen.joclray.rendering.FullRenderer;
+import io.klinamen.joclray.rendering.Renderer;
 import io.klinamen.joclray.scene.Camera;
 import io.klinamen.joclray.scene.Scene;
+import io.klinamen.joclray.util.FloatVec4;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -38,7 +41,7 @@ public class JoclRay {
 
     public JoclRay() {
         // Create the main frame
-        JFrame frame = new JFrame("JOCL Simple Image Sample");
+        JFrame frame = new JFrame("JOCLRay");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout());
 
@@ -202,10 +205,21 @@ public class JoclRay {
                 ;
     }
 
+    private Renderer getRenderer(){
+//        return new VisibilityRenderer();
+        return new FullRenderer();
+    }
+
     private void render(Scene scene) {
-        try (Renderer renderer = new Renderer()) {
-//            renderer.cast(scene, image);
-            renderer.render(scene, image);
+        Renderer renderer = getRenderer();
+        renderer.render(scene, image);
+
+        if(renderer instanceof AutoCloseable){
+            try {
+                ((AutoCloseable) renderer).close();
+            } catch (Exception e) {
+                throw new RuntimeException(String.format("Error closing renderer: %s", e.getMessage()), e);
+            }
         }
     }
 }

@@ -1,6 +1,6 @@
 package io.klinamen.joclray.geom;
 
-import io.klinamen.joclray.FloatVec4;
+import io.klinamen.joclray.util.FloatVec4;
 
 public class Sphere extends Surface {
     private float radius;

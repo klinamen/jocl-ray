@@ -1,6 +1,6 @@
 package io.klinamen.joclray.light;
 
-import io.klinamen.joclray.FloatVec4;
+import io.klinamen.joclray.util.FloatVec4;
 
 public class PointLight {
     private float intensity;

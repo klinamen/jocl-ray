@@ -1,6 +1,6 @@
 package io.klinamen.joclray.geom;
 
-import io.klinamen.joclray.FloatVec4;
+import io.klinamen.joclray.util.FloatVec4;
 
 public abstract class Surface {
     private FloatVec4 kd = new FloatVec4();

@@ -1,6 +1,6 @@
 package io.klinamen.joclray.kernels.intersection;
 
-import io.klinamen.joclray.FloatVec4;
+import io.klinamen.joclray.util.FloatVec4;
 
 import java.util.Arrays;
 

@@ -1,4 +1,4 @@
-package io.klinamen.joclray;
+package io.klinamen.joclray.util;
 
 public class FloatVec4 {
     public static int DIM = 4;

@@ -1,7 +1,7 @@
 package io.klinamen.joclray.kernels;
 
-import io.klinamen.joclray.FloatVec4;
 import io.klinamen.joclray.scene.Scene;
+import io.klinamen.joclray.util.FloatVec4;
 
 public class ViewRaysKernelParams {
     private final int imageWidth;

@@ -1,12 +1,12 @@
 package io.klinamen.joclray.kernels;
 
-import io.klinamen.joclray.FloatVec4;
 import io.klinamen.joclray.kernels.intersection.IntersectResult;
 import io.klinamen.joclray.kernels.intersection.IntersectionKernelBuffers;
 import io.klinamen.joclray.kernels.intersection.IntersectionOperation;
 import io.klinamen.joclray.kernels.intersection.IntersectionOperationParams;
 import io.klinamen.joclray.kernels.intersection.factory.IntersectionKernelFactory;
 import io.klinamen.joclray.scene.LightElement;
+import io.klinamen.joclray.util.FloatVec4;
 import org.jocl.cl_command_queue;
 import org.jocl.cl_context;
 
@@ -36,6 +36,7 @@ public class LightIntensityMapOperation implements OpenCLKernel<LightIntensityMa
         ShadowRaysKernel shadowRaysKernel = new ShadowRaysKernel(context);
         shadowRaysKernel.setParams(shadowRaysKernelParams);
 
+        // compute shadow rays, for each primary ray and light
         shadowRaysKernel.enqueue(queue);
 
         shadowRaysBuffer.readTo(queue, shadowRaysResult);
@@ -44,6 +45,11 @@ public class LightIntensityMapOperation implements OpenCLKernel<LightIntensityMa
 
         int i = 0;
         for (LightElement light : params.getLights()) {
+            // TODO try to use FloatBuffer to avoid copying to new buffers
+//            FloatBuffer lightShadowRayOrigin = FloatBuffer.wrap(shadowRaysResult.getRayOrigins(), i * rays * FloatVec4.DIM, rays * FloatVec4.DIM);
+//            FloatBuffer lightShadowRayDirections = FloatBuffer.wrap(shadowRaysResult.getRayDirections(), i * rays * FloatVec4.DIM, rays * FloatVec4.DIM);
+//            RaysBuffers lightShadowRays = RaysBuffers.create(context, lightShadowRayOrigin, lightShadowRayDirections);
+
             float[] shOrigins = new float[rays * FloatVec4.DIM];
             System.arraycopy(shadowRaysResult.getRayOrigins(), i * shOrigins.length, shOrigins, 0, shOrigins.length);
 
@@ -52,11 +58,6 @@ public class LightIntensityMapOperation implements OpenCLKernel<LightIntensityMa
 
             RaysGenerationResult shRes = new RaysGenerationResult(shOrigins, shDirs);
             RaysBuffers lightShadowRays = RaysBuffers.create(context, shRes);
-
-//            FloatBuffer lightShadowRayOrigin = FloatBuffer.wrap(shadowRaysResult.getRayOrigins(), i * rays, rays);
-//            FloatBuffer lightShadowRayDirections = FloatBuffer.wrap(shadowRaysResult.getRayDirections(), i * rays, rays);
-//
-//            RaysBuffers lightShadowRays = RaysBuffers.create(context, lightShadowRayOrigin, lightShadowRayDirections);
 
             IntersectResult shadowIntersect = new IntersectResult(rays);
             IntersectionKernelBuffers intersectionKernelBuffers = IntersectionKernelBuffers.fromResult(context, shadowIntersect);
@@ -74,6 +75,8 @@ public class LightIntensityMapOperation implements OpenCLKernel<LightIntensityMa
 
             for (int r = 0; r < rays; r++) {
                 FloatVec4 shadowOrigin = FloatVec4.extract(shOrigins, r * FloatVec4.DIM);
+//                FloatVec4 shadowOrigin = FloatVec4.extract(shadowRaysResult.getRayOrigins(), i * rays * FloatVec4.DIM + r * FloatVec4.DIM);
+
                 float lightDist = shadowOrigin.minus(light.getLight().getPosition()).length();
                 float t = hitDistances[r];
 

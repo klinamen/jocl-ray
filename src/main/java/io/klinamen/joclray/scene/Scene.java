@@ -1,9 +1,9 @@
 package io.klinamen.joclray.scene;
 
 import com.google.common.collect.ImmutableSortedMap;
-import io.klinamen.joclray.FloatVec4;
 import io.klinamen.joclray.geom.Surface;
 import io.klinamen.joclray.light.PointLight;
+import io.klinamen.joclray.util.FloatVec4;
 
 import java.util.SortedMap;
 import java.util.TreeMap;

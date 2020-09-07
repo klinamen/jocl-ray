@@ -1,9 +1,9 @@
 package io.klinamen.joclray.kernels.intersection.impl;
 
 import com.google.common.collect.Lists;
-import io.klinamen.joclray.OpenCLUtils;
 import io.klinamen.joclray.geom.Box;
 import io.klinamen.joclray.kernels.intersection.AbstractIntersectionKernel;
+import io.klinamen.joclray.util.OpenCLUtils;
 import org.jocl.*;
 
 import java.util.List;

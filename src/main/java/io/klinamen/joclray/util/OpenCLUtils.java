@@ -1,4 +1,4 @@
-package io.klinamen.joclray;
+package io.klinamen.joclray.util;
 
 import org.jocl.*;
 
