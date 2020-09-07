@@ -17,7 +17,7 @@ public class PlaneIntersectionKernel extends AbstractIntersectionKernel<Plane> {
 
     @Override
     protected String getKernelName() {
-        return "planeIntersect2";
+        return "planeIntersect";
     }
 
     @Override

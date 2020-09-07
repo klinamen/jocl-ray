@@ -1,63 +1,52 @@
-__kernel void sphereIntersect(const float2 frameSize, const float4 e,
-                              const float fov_rad, __global float4 *hitNormals,
-                              __global float4 *hitPoints, __global int *hitMap,
-                              __global const int *sphereIds,
+__kernel void sphereIntersect(__global float4 *rayOrigins,
+                              __global float4 *rayDirections,
+                              __global float4 *hitNormals,
+                              __global float *hitDistance,
+                              __global int *hitMap,
+                              __global const int *elementIds,
                               __global const float4 *centers,
                               __global const float *radiuses) {
-  int gid = get_global_id(0);
+  int ray = get_global_id(0);
+  int elementIndex = get_global_id(1);
 
-  int px = gid % (int)frameSize.x;
-  int py = gid / (int)frameSize.x;
+  // ray
+  float4 ro = rayOrigins[ray];
+  float4 rd = rayDirections[ray];
 
-  // int nx = frameSize.x;
-  // int ny = frameSize.y;
-
-  // // ray = e + t * rd; rd: ray direction
-  // float4 rd;
-  // rd.x = -frameSize.x / 2 + frameSize.x * (px + 0.5) / nx;
-  // rd.y = frameSize.y / 2 - frameSize.y * (py + 0.5) / ny;
-  // rd.z = -d;
-  // rd.w = 0;
-
-  float aspectRatio = frameSize.x / frameSize.y;
-  float4 rd;
-  rd.x = (2 * ((px + 0.5) / frameSize.x) - 1) * aspectRatio * tan(fov_rad / 2);
-  rd.y = (1 - 2 * ((py + 0.5) / frameSize.y)) * tan(fov_rad / 2);
-  rd.z = -1;
-  rd.w = 0;
-
-  rd = normalize(rd - e);
-
-  int hitId = -1;
-  float4 n = (float4)(0);
-  float4 p = (float4)(0);
-
-  int i = get_global_id(1);
-
-  float4 c = centers[i];
-  float r = radiuses[i];
+  float4 c = centers[elementIndex];
+  float r = radiuses[elementIndex];
 
   float discr =
-      pow(dot(rd, e - c), 2) - dot(rd, rd) * (dot(e - c, e - c) - pow(r, 2));
+      pow(dot(rd, ro - c), 2) - dot(rd, rd) * (dot(ro - c, ro - c) - pow(r, 2));
 
   if (discr >= 0) {
-    float b = -dot(rd, e - c);
-    float t = (b - sqrt(discr)) / dot(rd, rd);
+    float b = -dot(rd, ro - c);
+    float sqDiscr = sqrt(discr);
+    float t = (b - sqDiscr) / dot(rd, rd);
     if (t < 0) {
-      t = (b + sqrt(discr)) / dot(rd, rd);
+      t = (b + sqDiscr) / dot(rd, rd);
     }
 
     if (t > 0) {
-      p = e + t * rd;
-      n = (p - c) / r;
-      hitId = sphereIds[i];
+      // hit!
+
+      // TODO this is unsafe, as it is accessed concurrently by multiple threads.
+      if(hitMap[ray] < 0 || t < hitDistance[ray]){
+        float4 p = ro + t * rd;
+        float4 n = (p - c) / r;
+
+        hitMap[ray] = elementIds[elementIndex];
+        hitNormals[ray] = n;
+        hitDistance[ray] = t;
+      }
     }
   }
 
-  // updates hitmap only if empty or the found intersection is nearer
-  if (hitId >= 0 && (hitMap[gid] < 0 || length(p) < length(hitPoints[gid]))) {
-    hitMap[gid] = hitId;
-    hitNormals[gid] = n;
-    hitPoints[gid] = p;
-  }
+  // int pix = 387072;
+  // if (ray == pix) {
+  //   float4 p = ro + hitDistance[ray] * rd;
+  //   printf("Sphere %d: pix=%d; hm=%d; hd=%f; hn=(%f, %f, %f); p=(%f, %f, %f); ro=(%f, %f, %f); rd=(%f, %f, %f)\n",
+  //          elementIndex, pix, hitMap[ray], hitDistance[ray], hitNormals[ray].x, hitNormals[ray].y, hitNormals[ray].z, 
+  //          p.x, p.y, p.z, ro.x, ro.y, ro.z, rd.x, rd.y, rd.z);
+  // }
 }

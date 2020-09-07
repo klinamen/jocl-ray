@@ -1,59 +1,43 @@
-__kernel void planeIntersect(const float2 frameSize, const float4 e,
-                             const float fov_rad, __global float4 *hitNormals,
-                             __global float4 *hitPoints, __global int *hitMap,
-                             __global const int *elemIds,
-                             __global const float4 *planePos,
-                             __global const float4 *planeNormals) {
-  int gid = get_global_id(0);
+__kernel void planeIntersect(__global float4 *rayOrigins,
+                              __global float4 *rayDirections,
+                              __global float4 *hitNormals,
+                              __global float *hitDistances,
+                              __global int *hitMap,
+                              __global const int *elementIds,
+                              __global const float4 *planePos,
+                              __global const float4 *planeNormals) {
+  int ray = get_global_id(0);
+  int elementIndex = get_global_id(1);
 
-  int px = gid % (int)frameSize.x;
-  int py = gid / (int)frameSize.x;
+  // ray
+  float4 ro = rayOrigins[ray];
+  float4 rd = rayDirections[ray];
 
-  // int nx = frameSize.x;
-  // int ny = frameSize.y;
+  float4 p = planePos[elementIndex];
+  float4 n = normalize(planeNormals[elementIndex]);
 
-  // // ray = e + t * rd; rd: ray direction
-  // float4 rd;
-  // rd.x = -frameSize.x / 2 + frameSize.x * (px + 0.5) / nx;
-  // rd.y = frameSize.y / 2 - frameSize.y * (py + 0.5) / ny;
-  // rd.z = -d;
-  // rd.w = 0;
+  float den = dot(rd, n);
 
-  float aspectRatio = frameSize.x / frameSize.y;
-  float4 rd;
-  rd.x = (2 * ((px + 0.5) / frameSize.x) - 1) * aspectRatio * tan(fov_rad / 2);
-  rd.y = (1 - 2 * ((py + 0.5) / frameSize.y)) * tan(fov_rad / 2);
-  rd.z = -1;
-  rd.w = 0;
+  if (fabs(den) > 0.001f) {
+    float t = dot(p - ro, n) / den;
 
-  rd = normalize(rd);
+    if (t >= 0) {
+      // hit!
 
-  int hitId = -1;
-  float4 n = (float4)(0);
-  float4 p = (float4)(0);
-
-  int i = get_global_id(1);
-
-  float4 pPos = planePos[i];
-  float4 pNorm = normalize(planeNormals[i]);
-
-  float den = dot(rd, pNorm);
-
-  if (den > 0) {
-    float t = dot(pPos - e, pNorm) / den;
-
-    // if (t >= 0 && (hitId < 0 || t < tMin)) {
-    if (hitId < 0) {
-      p = e + t * rd;
-      n = -pNorm; // this should be pNorm!
-      hitId = elemIds[i];
+      // TODO this is unsafe, as it is accessed concurrently by multiple threads.
+      if (hitMap[ray] < 0 || t < hitDistances[ray]) {
+        hitMap[ray] = elementIds[elementIndex];
+        hitNormals[ray] = n;
+        hitDistances[ray] = t;
+      }
     }
   }
 
-  // updates hitmap only if empty or the found intersection is nearer
-  if (hitId >= 0 && (hitMap[gid] < 0 || length(p) < length(hitPoints[gid]))) {
-    hitMap[gid] = hitId;
-    hitNormals[gid] = n;
-    hitPoints[gid] = p;
-  }
+  // int pix = 387072;
+  // if (ray == pix) {
+  //   float4 p = ro + hitDistances[ray] * rd;
+  //   printf("Plane %d: pix=%d; hm=%d; hd=%f; hn=(%f, %f, %f); p=(%f, %f, %f); ro=(%f, %f, %f); rd=(%f, %f, %f)\n",
+  //          elementIndex, pix, hitMap[ray], hitDistances[ray], hitNormals[ray].x, hitNormals[ray].y, hitNormals[ray].z, 
+  //          p.x, p.y, p.z, ro.x, ro.y, ro.z, rd.x, rd.y, rd.z);
+  // }
 }

@@ -17,7 +17,7 @@ public class SphereIntersectionKernel extends AbstractIntersectionKernel<Sphere>
 
     @Override
     protected String getKernelName() {
-        return "sphereIntersect2";
+        return "sphereIntersect";
     }
 
     @Override

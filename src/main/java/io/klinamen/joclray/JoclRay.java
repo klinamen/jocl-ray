@@ -25,17 +25,15 @@ public class JoclRay {
     BufferedImage image;
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                try {
-                    UIManager.setLookAndFeel(
-                            UIManager.getSystemLookAndFeelClassName());
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-
-                new JoclRay();
+        SwingUtilities.invokeLater(() -> {
+            try {
+                UIManager.setLookAndFeel(
+                        UIManager.getSystemLookAndFeelClassName());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
+
+            new JoclRay();
         });
     }
 
@@ -169,9 +167,9 @@ public class JoclRay {
                         .setKr(new FloatVec4(0.4f, 0.4f, 0.2f))
                         .setPhongExp(800)
                 )
-                .add("Box", new Box()
-                        .setVertexMin(new FloatVec4(12.5f, -5, -18))
-                        .setVertexMax(new FloatVec4(12.7f, 3, -27))
+                .add("Bix_Mirror", new Box()
+                        .setVertexMin(new FloatVec4(13.5f, -5, -21))
+                        .setVertexMax(new FloatVec4(13.7f, 5, -30))
                         .setKd(new FloatVec4(0, 0.3f, 0.3f))
                         .setKs(new FloatVec4(0.3f, 0.3f, 0.3f))
                         .setKr(new FloatVec4(0.4f, 0.4f, 0.7f))
