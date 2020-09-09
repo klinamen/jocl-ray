@@ -131,7 +131,7 @@ public class JoclRayUI implements Runnable {
         btSave.addActionListener(actionEvent -> {
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setDialogTitle("Save image");
-            fileChooser.setSelectedFile(new File("render.bmp"));
+            fileChooser.setSelectedFile(new File("render.png"));
 
             int userSelection = fileChooser.showSaveDialog(frame);
             if (userSelection == JFileChooser.APPROVE_OPTION) {
@@ -152,7 +152,7 @@ public class JoclRayUI implements Runnable {
 
                 if (doWrite) {
                     try {
-                        ImageIO.write(image, "BMP", fileToSave);
+                        ImageIO.write(image, "PNG", fileToSave);
                     } catch (IOException e) {
                         throw new RuntimeException(String.format("Error saving image to %s: %s", fileToSave.getAbsolutePath(), e.getMessage()), e);
                     }
