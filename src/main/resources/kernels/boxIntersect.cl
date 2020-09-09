@@ -1,3 +1,5 @@
+#define NORMAL_BIAS 1.001f
+
 __kernel void boxIntersect(__global float4 *rayOrigins, __global float4 *rayDirections,
              __global float4 *hitNormals, __global float *hitDistances,
              __global int *hitMap, __global const int *elementIds,
@@ -33,12 +35,11 @@ __kernel void boxIntersect(__global float4 *rayOrigins, __global float4 *rayDire
         float4 c = (v0 + v1) / 2;
         float4 p = hitPoint - c;
         float4 d = (v0 - v1) / 2;
-        float bias = 1.0001f;
 
         float4 n = normalize((float4)(
-          (int)(p.x / fabs(d.x) * bias), 
-          (int)(p.y / fabs(d.y) * bias), 
-          (int)(p.z / fabs(d.z) * bias), 0)
+          (int)(p.x / fabs(d.x) * NORMAL_BIAS), 
+          (int)(p.y / fabs(d.y) * NORMAL_BIAS), 
+          (int)(p.z / fabs(d.z) * NORMAL_BIAS), 0)
           );
 
         // TODO this is unsafe, as it is accessed concurrently by multiple threads.

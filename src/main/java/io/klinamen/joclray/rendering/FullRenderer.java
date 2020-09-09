@@ -18,6 +18,13 @@ import io.klinamen.joclray.util.FloatVec4;
 import java.awt.image.BufferedImage;
 
 public class FullRenderer extends OpenCLRenderer implements AutoCloseable {
+    public FullRenderer() {
+    }
+
+    public FullRenderer(int platformIndex, int deviceIndex) {
+        super(platformIndex, deviceIndex);
+    }
+
     @Override
     protected void doRender(Scene scene, BufferedImage outImage) {
         final int nPixels = scene.getCamera().getPixels();

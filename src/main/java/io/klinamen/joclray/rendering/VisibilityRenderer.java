@@ -15,6 +15,13 @@ import io.klinamen.joclray.scene.Scene;
 import java.awt.image.BufferedImage;
 
 public class VisibilityRenderer extends OpenCLRenderer {
+    public VisibilityRenderer() {
+    }
+
+    public VisibilityRenderer(int platformIndex, int deviceIndex) {
+        super(platformIndex, deviceIndex);
+    }
+
     @Override
     protected void doRender(Scene scene, BufferedImage outImage) {
         final int nPixels = scene.getCamera().getPixels();

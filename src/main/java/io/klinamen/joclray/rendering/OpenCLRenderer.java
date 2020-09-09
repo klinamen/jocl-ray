@@ -13,6 +13,17 @@ public abstract class OpenCLRenderer implements Renderer, AutoCloseable {
     private cl_context context;
     private cl_command_queue queue;
 
+    private int platformIndex = 0;
+    private int deviceIndex = 0;
+
+    public OpenCLRenderer() {
+    }
+
+    public OpenCLRenderer(int platformIndex, int deviceIndex) {
+        this.platformIndex = platformIndex;
+        this.deviceIndex = deviceIndex;
+    }
+
     protected cl_context getContext() {
         if(context == null){
             initCL();
@@ -30,12 +41,6 @@ public abstract class OpenCLRenderer implements Renderer, AutoCloseable {
     }
 
     private void initCL() {
-        // The platform, device type and device number
-        // that will be used
-        final long deviceType = CL_DEVICE_TYPE_ALL;
-        final int platformIndex = 1;
-        final int deviceIndex = 0;
-
         // Enable exceptions and subsequently omit error checks in this sample
         CL.setExceptionsEnabled(true);
 
@@ -44,7 +49,7 @@ public abstract class OpenCLRenderer implements Renderer, AutoCloseable {
 
         for (int i = 0; i < platforms.length; i++) {
             cl_platform_id platform = platforms[i];
-            cl_device_id[] platformDevices = getDevices(platform, deviceType);
+            cl_device_id[] platformDevices = getDevices(platform, CL_DEVICE_TYPE_ALL);
             for (int j = 0; j < platformDevices.length; j++) {
                 cl_device_id[] devs = devicesByPlatform.getOrDefault(i, new cl_device_id[platformDevices.length]);
                 devs[j] = platformDevices[j];
@@ -61,7 +66,6 @@ public abstract class OpenCLRenderer implements Renderer, AutoCloseable {
             }
         }
         System.out.println("---");
-
 
         cl_platform_id platform = platforms[platformIndex];
 

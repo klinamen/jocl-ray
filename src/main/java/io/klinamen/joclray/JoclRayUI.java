@@ -7,9 +7,11 @@ import io.klinamen.joclray.light.PointLight;
 import io.klinamen.joclray.light.SpotLight;
 import io.klinamen.joclray.rendering.FullRenderer;
 import io.klinamen.joclray.rendering.Renderer;
+import io.klinamen.joclray.rendering.VisibilityRenderer;
 import io.klinamen.joclray.scene.Camera;
 import io.klinamen.joclray.scene.Scene;
 import io.klinamen.joclray.util.FloatVec4;
+import picocli.CommandLine;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -20,31 +22,58 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
+import static picocli.CommandLine.*;
 
-public class JoclRay {
-    BufferedImage image;
+@Command(name = "joclrayui", mixinStandardHelpOptions = true, version = "JOCLRay v1.0")
+public class JoclRayUI implements Runnable {
+    private BufferedImage image;
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            try {
-                UIManager.setLookAndFeel(
-                        UIManager.getSystemLookAndFeelClassName());
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+    private String imageSize;
 
-            new JoclRay();
-        });
+    @Option(names = {"-p", "--platform"}, description = "Index of the OpenCL platform to use (default: ${DEFAULT-VALUE}).")
+    private int platformIndex = 0;
+
+    @Option(names = {"-d", "--device"}, description = "Index of the OpenCL device to use. (default: ${DEFAULT-VALUE})")
+    private int deviceIndex = 0;
+
+    @Option(names = {"-r", "--renderer"}, description = "The name of the renderer to use (default: ${DEFAULT-VALUE}) . Valid values: ${COMPLETION-CANDIDATES}")
+    private RendererType rendererType = RendererType.Shading;
+
+    @Spec
+    Model.CommandSpec spec;
+
+    @Option(names = {"-s", "--imageSize"}, defaultValue = "1920x1080", description = "Size of the output image in pixels <W>x<H> (default: ${DEFAULT-VALUE}).")
+    public JoclRayUI setImageSize(String imageSize) {
+        if (imageSize == null || !imageSize.matches("\\d+x\\d+")) {
+            throw new ParameterException(spec.commandLine(), "Invalid image size specification.");
+        }
+
+        this.imageSize = imageSize;
+        return this;
     }
 
-    public JoclRay() {
+    private int getImageWidth() {
+        String[] res = imageSize.split("x", 2);
+        return Integer.parseInt(res[0]);
+    }
+
+    private int getImageHeight() {
+        String[] res = imageSize.split("x", 2);
+        return Integer.parseInt(res[1]);
+    }
+
+    public static void main(String[] args) {
+        new CommandLine(new JoclRayUI()).execute(args);
+    }
+
+    private void buildUI() {
         // Create the main frame
         JFrame frame = new JFrame("JOCLRay");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout());
 
         image = new BufferedImage(
-                1920, 1080, BufferedImage.TYPE_INT_RGB);
+                getImageWidth(), getImageHeight(), BufferedImage.TYPE_INT_RGB);
 
         Scene scene = buildScene();
 
@@ -101,16 +130,32 @@ public class JoclRay {
         btSave.setText("Save Image...");
         btSave.addActionListener(actionEvent -> {
             JFileChooser fileChooser = new JFileChooser();
-            fileChooser.setDialogTitle("Save image to");
+            fileChooser.setDialogTitle("Save image");
+            fileChooser.setSelectedFile(new File("render.bmp"));
 
             int userSelection = fileChooser.showSaveDialog(frame);
             if (userSelection == JFileChooser.APPROVE_OPTION) {
+                boolean doWrite = true;
                 File fileToSave = fileChooser.getSelectedFile();
+                if (fileToSave.exists()) {
+                    int result = JOptionPane.showConfirmDialog(
+                            frame,
+                            "File exists, overwrite?", "File exists",
+                            JOptionPane.YES_NO_CANCEL_OPTION);
+                    switch (result) {
+                        case JOptionPane.YES_OPTION:
+                            break;
+                        default:
+                            doWrite = false;
+                    }
+                }
 
-                try {
-                    ImageIO.write(image, "bmp", fileToSave);
-                } catch (IOException e) {
-                    throw new RuntimeException(String.format("Error saving image to %s: %s", fileToSave.getAbsolutePath(), e.getMessage()), e);
+                if (doWrite) {
+                    try {
+                        ImageIO.write(image, "BMP", fileToSave);
+                    } catch (IOException e) {
+                        throw new RuntimeException(String.format("Error saving image to %s: %s", fileToSave.getAbsolutePath(), e.getMessage()), e);
+                    }
                 }
             }
         });
@@ -203,21 +248,32 @@ public class JoclRay {
                 ;
     }
 
-    private Renderer getRenderer(){
-//        return new VisibilityRenderer();
-        return new FullRenderer();
+    private Renderer getRenderer() {
+        switch (rendererType) {
+            case Visibility:
+                return new VisibilityRenderer(platformIndex, deviceIndex);
+            case Shading:
+                return new FullRenderer(platformIndex, deviceIndex);
+        }
+
+        throw new UnsupportedOperationException("Unsupported renderer type: " + rendererType);
     }
 
     private void render(Scene scene) {
         Renderer renderer = getRenderer();
         renderer.render(scene, image);
 
-        if(renderer instanceof AutoCloseable){
+        if (renderer instanceof AutoCloseable) {
             try {
                 ((AutoCloseable) renderer).close();
             } catch (Exception e) {
                 throw new RuntimeException(String.format("Error closing renderer: %s", e.getMessage()), e);
             }
         }
+    }
+
+    @Override
+    public void run() {
+        SwingUtilities.invokeLater(this::buildUI);
     }
 }
