@@ -30,8 +30,11 @@ JOCLRay has a few command line options you can explore with the `--help` option.
 ## Limitations and Future Work
 - Extend the renderer to make use of multiple OpenCL devices.
 - Surfaces in the scene are grouped by type and an intersection kernel is scheduled on the GPU foe each group. Thus, each GPU thread calculates intersections for a `<ray, element>` pair. However, currently there is no reduction step to merge the results and the memory access model may lead to corruption.
+- Shadow rays and their intersections are generated on the GPU, whereas the results are merged by the CPU into a light-intensity map. Try to move the whole process to GPU and find a more compact data structure to represent the contribution of each light for each primary ray.
+- Parallelize shading across lights.
 - Camera, lights and all the objects are axis-aligned, as there is no support for transformations.
 - Support more primitives.
 - Support loading of polygonal models.
 - Support more material properties.
 - Simplify the wrappers and buffer management code.
+- ...
