@@ -33,6 +33,7 @@ JOCLRay has a few command line options you can explore with the `--help` option.
 ![Image of Scene1](./sample-images/scene1.png)
 
 - FOV (grad): 50
+- 1 primary ray per-pixel
 - Lights: 3 point lights, 1 spot light
 - Objects: 8
 - Reflection bounces: 4
@@ -49,7 +50,8 @@ Intel UHD Graphics 620  | 3.4s
 ![Image of Scene2](./sample-images/scene2.png)
 
 - FOV (grad): 30
-- Lights: 3 point lights, 2 spot lights
+- 1 primary ray per-pixel
+- Lights: 1 point lights, 2 spot lights
 - Objects: 10
 - Reflection bounces: 4
 
