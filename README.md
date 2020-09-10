@@ -27,6 +27,39 @@ java -jar ./target/joclray-1.0-SNAPSHOT-jar-with-dependencies.jar
 
 JOCLRay has a few command line options you can explore with the `--help` option.
 
+## Sample scenes
+
+### Scene 1
+![Image of Scene1](./sample-images/scene1.png)
+
+- FOV (grad): 50
+- Lights: 3 point lights, 1 spot light
+- Objects: 8
+- Reflection bounces: 4
+
+Rendering times on my laptop (Intel(R) Core(TM) i7-8550U CPU @ 1.80GHz, 16GB RAM, NVIDIA GeForce MX150) for both NVIDIA and Intel GPU. Reported rendering time is the average over 10 sequential runs, discarding the first one in which compilation of OpenCL kernels happens.
+
+GPU         | Rendering Time
+----------- | -------------
+NVIDIA GeForce MX150    | 1.3s
+Intel UHD Graphics 620  | 3.4s
+
+
+### Scene 2
+![Image of Scene2](./sample-images/scene2.png)
+
+- FOV (grad): 30
+- Lights: 3 point lights, 2 spot lights
+- Objects: 10
+- Reflection bounces: 4
+
+Rendering times on my laptop (Intel(R) Core(TM) i7-8550U CPU @ 1.80GHz, 16GB RAM, NVIDIA GeForce MX150) for both NVIDIA and Intel GPU. Reported rendering time is the average over 10 sequential runs, discarding the first one in which compilation of OpenCL kernels happens.
+
+GPU         | Rendering Time
+----------- | -------------
+NVIDIA GeForce MX150    | 1.6s
+Intel UHD Graphics 620  | 3.5s
+
 ## Limitations and Future Work
 - Extend the renderer to make use of multiple OpenCL devices.
 - Surfaces in the scene are grouped by type and an intersection kernel is scheduled on the GPU for each group. Thus, each GPU thread calculates intersections for a `<ray, element>` pair. However, currently, there is no reduction step to merge the results and the memory access model may lead to the corruption of the buffer holding intersections results.
