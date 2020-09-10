@@ -70,5 +70,7 @@ __kernel void shading(__global float4 *rayOrigins,
   rayDirections[ray] = rrd;
 
   // accumulate kr of the hit object for this ray
+  // c(i) = bp(i) + kr(i) * c(i-1) = bp(i) + kr(i) * (bp(i-1) + kr(i-1) * c(i-2)) = ...
+  // = bp(0) + kr(1) * bp(1) + kr(1) * kr(2) * bp(2) + ...
   krPrev[ray] *= kr[hitElementId];
 }

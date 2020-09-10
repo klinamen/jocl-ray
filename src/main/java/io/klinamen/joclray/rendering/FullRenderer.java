@@ -18,7 +18,18 @@ import io.klinamen.joclray.util.FloatVec4;
 import java.awt.image.BufferedImage;
 
 public class FullRenderer extends OpenCLRenderer implements AutoCloseable {
+    private final IntersectionKernelFactory intersectionKernelFactory = new RegistryIntersectionKernelFactory(getContext());
+
+    private final ViewRaysKernel viewRaysKernel = new ViewRaysKernel(getContext());
+    private final ShadowRaysKernel shadowRaysKernel = new ShadowRaysKernel(getContext());
+    private final ShadingKernel shadingKernel = new ShadingKernel(getContext());
+
+    private final IntersectionOperation intersectionOp = new IntersectionOperation(intersectionKernelFactory);
+    private final LightIntensityMapOperation lightIntensityMapOperation = new LightIntensityMapOperation(getContext(), shadowRaysKernel, intersectionOp);
+    private final ShadingOperation shadingOperation = new ShadingOperation(intersectionOp, shadingKernel, 4);
+
     public FullRenderer() {
+
     }
 
     public FullRenderer(int platformIndex, int deviceIndex) {
@@ -30,49 +41,61 @@ public class FullRenderer extends OpenCLRenderer implements AutoCloseable {
         final int nPixels = scene.getCamera().getPixels();
         float[] imageBuffer = new float[nPixels * FloatVec4.DIM];
 
-//        IntersectionKernelFactory intersectionKernelFactory = new PrototypeIntersectionKernelFactory(getContext());
-        IntersectionKernelFactory intersectionKernelFactory = new RegistryIntersectionKernelFactory(getContext());
-
         RaysGenerationResult rays = new RaysGenerationResult(nPixels);
-        RaysBuffers viewRaysBuffers = RaysBuffers.create(getContext(), rays);
-        ViewRaysKernelParams viewRaysKernelParams = new ViewRaysKernelParams(outImage.getWidth(), outImage.getHeight(), scene.getOrigin(), scene.getCamera().getFovRad(), viewRaysBuffers);
-        ViewRaysKernel viewRaysKernel = new ViewRaysKernel(getContext());
-        viewRaysKernel.setParams(viewRaysKernelParams);
 
-        // generate view rays
-        viewRaysKernel.enqueue(getQueue());
+        try(RaysBuffers viewRaysBuffers = RaysBuffers.create(getContext(), rays)){
+            // generate view rays
+            viewRaysKernel.setParams(new ViewRaysKernelParams(outImage.getWidth(), outImage.getHeight(), scene.getOrigin(), scene.getCamera().getFovRad(), viewRaysBuffers));
+            viewRaysKernel.enqueue(getQueue());
 
-        IntersectResult intersectResult = new IntersectResult(nPixels);
-        IntersectionKernelBuffers viewRaysIntersectionsBuffers = IntersectionKernelBuffers.fromResult(getContext(), intersectResult);
-        IntersectionOperationParams viewRayIntersectionParams = new IntersectionOperationParams(scene.getSurfaces(), viewRaysBuffers, viewRaysIntersectionsBuffers);
-        IntersectionOperation viewRaysIntersection = new IntersectionOperation(intersectionKernelFactory);
-        viewRaysIntersection.setParams(viewRayIntersectionParams);
+            IntersectResult intersectResult = new IntersectResult(nPixels);
 
-        // primary ray intersections
-        viewRaysIntersection.enqueue(getQueue());
+            try (IntersectionKernelBuffers viewRaysIntersectionsBuffers = IntersectionKernelBuffers.fromResult(getContext(), intersectResult)) {
+                // primary ray intersections
+                intersectionOp.setParams(new IntersectionOperationParams(scene.getSurfaces(), viewRaysBuffers, viewRaysIntersectionsBuffers));
+                intersectionOp.enqueue(getQueue());
 
-        LightIntensityMapOperationParams lightIntensityMapOperationParams = new LightIntensityMapOperationParams(scene.getLightElements(), scene.getSurfaces(), viewRaysBuffers, viewRaysIntersectionsBuffers);
-        LightIntensityMapOperation lightIntensityMapOperation = new LightIntensityMapOperation(getContext(), intersectionKernelFactory);
-        lightIntensityMapOperation.setParams(lightIntensityMapOperationParams);
+                // compute light intensity map (for shadows)
+                LightIntensityMapOperationParams lightIntensityMapOperationParams = new LightIntensityMapOperationParams(scene.getLightElements(), scene.getSurfaces(), viewRaysBuffers, viewRaysIntersectionsBuffers);
+                lightIntensityMapOperation.setParams(lightIntensityMapOperationParams);
+                lightIntensityMapOperation.enqueue(getQueue());
 
-        // compute light intensity map (for shadows)
-        lightIntensityMapOperation.enqueue(getQueue());
+                float[] lightIntensityMap = lightIntensityMapOperationParams.getLightIntensityMap();
 
-        float[] lightIntensityMap = lightIntensityMapOperationParams.getLightIntensityMap();
+                try (ShadingKernelBuffers shadingKernelBuffers = ShadingKernelBuffers.create(getContext(), nPixels, scene, lightIntensityMap, imageBuffer)) {
+                    // shading
+                    intersectionOp.setParams(new IntersectionOperationParams(scene.getSurfaces(), viewRaysBuffers, viewRaysIntersectionsBuffers));
+                    shadingKernel.setParams(new ShadingKernelParams(
+                            viewRaysBuffers, viewRaysIntersectionsBuffers, shadingKernelBuffers,
+                            scene.getAmbientLightIntensity(), scene.getLightElements().size()
+                    ));
 
-        ShadingKernelBuffers shadingKernelBuffers = ShadingKernelBuffers.create(getContext(), viewRaysBuffers, viewRaysIntersectionsBuffers, scene, lightIntensityMap, imageBuffer);
-        ShadingKernelParams shadingKernelParams = new ShadingKernelParams(scene.getAmbientLightIntensity(), scene.getLightElements().size(), shadingKernelBuffers);
-        ShadingKernel shadingKernel = new ShadingKernel(getContext());
-        shadingKernel.setParams(shadingKernelParams);
+                    shadingOperation.enqueue(getQueue());
 
-        ShadingOperation shadingOperation = new ShadingOperation(viewRaysIntersection, shadingKernel, 4);
-
-        // shading
-        shadingOperation.enqueue(getQueue());
-
-        shadingKernelBuffers.readTo(getQueue(), imageBuffer);
+                    // read image output buffer
+                    shadingKernelBuffers.readTo(getQueue(), imageBuffer);
+                }
+            }
+        }
 
         // update image
         new ShadingDisplay(scene, imageBuffer).update(outImage);
+    }
+
+    @Override
+    public void close() {
+        super.close();
+
+        viewRaysKernel.close();
+        shadowRaysKernel.close();
+        shadingKernel.close();
+
+        if(intersectionKernelFactory instanceof AutoCloseable){
+            try {
+                ((AutoCloseable) intersectionKernelFactory).close();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }

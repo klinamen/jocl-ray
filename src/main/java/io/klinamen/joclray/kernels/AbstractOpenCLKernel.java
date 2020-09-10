@@ -75,7 +75,7 @@ public abstract class AbstractOpenCLKernel<TParams> implements OpenCLKernel<TPar
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         if (kernel != null) {
             clReleaseKernel(kernel);
         }

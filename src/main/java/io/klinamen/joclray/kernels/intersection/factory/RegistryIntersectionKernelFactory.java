@@ -13,7 +13,7 @@ import org.jocl.cl_context;
 import java.util.HashMap;
 import java.util.Map;
 
-public class RegistryIntersectionKernelFactory implements IntersectionKernelFactory {
+public class RegistryIntersectionKernelFactory implements IntersectionKernelFactory, AutoCloseable {
     private final Map<Class<? extends Surface>, AbstractIntersectionKernel<?>> registry = new HashMap<>();
 
     public RegistryIntersectionKernelFactory(cl_context context) {
@@ -34,6 +34,11 @@ public class RegistryIntersectionKernelFactory implements IntersectionKernelFact
         }
 
         return (AbstractIntersectionKernel<T>) kernel;
+    }
+
+    @Override
+    public void close() {
+        registry.values().forEach(AbstractIntersectionKernel::close);
     }
 }
 

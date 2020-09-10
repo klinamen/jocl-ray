@@ -50,7 +50,7 @@ public abstract class AbstractIntersectionKernel<T extends Surface> extends Abst
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         super.close();
 
         if (additionalBuffers != null) {

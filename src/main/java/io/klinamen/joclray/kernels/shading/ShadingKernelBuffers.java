@@ -1,8 +1,6 @@
 package io.klinamen.joclray.kernels.shading;
 
 import io.klinamen.joclray.geom.Surface;
-import io.klinamen.joclray.kernels.RaysBuffers;
-import io.klinamen.joclray.kernels.intersection.IntersectionKernelBuffers;
 import io.klinamen.joclray.light.PointLight;
 import io.klinamen.joclray.light.SpotLight;
 import io.klinamen.joclray.scene.ElementSet;
@@ -18,9 +16,6 @@ import java.util.Arrays;
 import static org.jocl.CL.*;
 
 public class ShadingKernelBuffers implements AutoCloseable {
-    private final RaysBuffers raysBuffers;
-    private final IntersectionKernelBuffers intersectionKernelBuffers;
-
     private final cl_mem krPrev;
 
     private final cl_mem kd;
@@ -35,9 +30,7 @@ public class ShadingKernelBuffers implements AutoCloseable {
 
     private final cl_mem image;
 
-    private ShadingKernelBuffers(RaysBuffers raysBuffers, IntersectionKernelBuffers intersectionKernelBuffers, cl_mem krPrev, cl_mem kd, cl_mem ks, cl_mem kr, cl_mem phongExp, cl_mem lightPos, cl_mem lightIntensity, cl_mem lightDirection, cl_mem lightAngleRad, cl_mem image) {
-        this.raysBuffers = raysBuffers;
-        this.intersectionKernelBuffers = intersectionKernelBuffers;
+    private ShadingKernelBuffers(cl_mem krPrev, cl_mem kd, cl_mem ks, cl_mem kr, cl_mem phongExp, cl_mem lightPos, cl_mem lightIntensity, cl_mem lightDirection, cl_mem lightAngleRad, cl_mem image) {
         this.krPrev = krPrev;
         this.kd = kd;
         this.ks = ks;
@@ -48,14 +41,6 @@ public class ShadingKernelBuffers implements AutoCloseable {
         this.lightDirection = lightDirection;
         this.lightAngleRad = lightAngleRad;
         this.image = image;
-    }
-
-    public IntersectionKernelBuffers getIntersectionKernelBuffers() {
-        return intersectionKernelBuffers;
-    }
-
-    public RaysBuffers getRaysBuffers() {
-        return raysBuffers;
     }
 
     public cl_mem getKd() {
@@ -98,11 +83,11 @@ public class ShadingKernelBuffers implements AutoCloseable {
         return lightAngleRad;
     }
 
-    public static ShadingKernelBuffers create(cl_context context, RaysBuffers raysBuffers, IntersectionKernelBuffers intersectionBuffers, Scene scene, float[] lightIntensityMap, float[] imageBuffer) {
+    public static ShadingKernelBuffers create(cl_context context, int rays, Scene scene, float[] lightIntensityMap, float[] imageBuffer) {
         cl_mem image = OpenCLUtils.allocateReadWriteMem(context, imageBuffer);
 
         // full contribution for primary rays -> initialized to 1
-        float[] krPrevBuf = new float[raysBuffers.getRays() * FloatVec4.DIM];
+        float[] krPrevBuf = new float[rays * FloatVec4.DIM];
         Arrays.fill(krPrevBuf, 1f);
         cl_mem krPrev = OpenCLUtils.allocateReadWriteMem(context, krPrevBuf);
 
@@ -137,7 +122,6 @@ public class ShadingKernelBuffers implements AutoCloseable {
         }));
 
         return new ShadingKernelBuffers(
-                raysBuffers, intersectionBuffers,
                 krPrev,
                 kd,
                 ks,
@@ -151,13 +135,11 @@ public class ShadingKernelBuffers implements AutoCloseable {
 
     public void readTo(cl_command_queue queue, float[] imageBuffer) {
         clEnqueueReadBuffer(queue, image, CL_TRUE, 0,
-                Sizeof.cl_float4 * getRaysBuffers().getRays(), Pointer.to(imageBuffer), 0, null, null);
+                Sizeof.cl_float * imageBuffer.length, Pointer.to(imageBuffer), 0, null, null);
     }
 
     @Override
-    public void close() throws Exception {
-        intersectionKernelBuffers.close();
-        raysBuffers.close();
+    public void close() {
         clReleaseMemObject(kd);
         clReleaseMemObject(ks);
         clReleaseMemObject(kr);

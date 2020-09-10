@@ -38,11 +38,11 @@ public class ShadingKernel extends AbstractOpenCLKernel<ShadingKernelParams> {
         ShadingKernelBuffers buffers = getParams().getBuffers();
 
         int a = 0;
-        clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(buffers.getRaysBuffers().getRayOrigins()));
-        clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(buffers.getRaysBuffers().getRayDirections()));
-        clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(buffers.getIntersectionKernelBuffers().getHitNormals()));
-        clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(buffers.getIntersectionKernelBuffers().getHitDistances()));
-        clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(buffers.getIntersectionKernelBuffers().getHitMap()));
+        clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getViewRaysBuffer().getRayOrigins()));
+        clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getViewRaysBuffer().getRayDirections()));
+        clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getViewRaysIntersectionBuffers().getHitNormals()));
+        clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getViewRaysIntersectionBuffers().getHitDistances()));
+        clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getViewRaysIntersectionBuffers().getHitMap()));
         clSetKernelArg(kernel, a++, Sizeof.cl_float, Pointer.to(new float[]{getParams().getAmbientLightIntensity()}));
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(buffers.getKd()));
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(buffers.getKs()));
@@ -61,7 +61,7 @@ public class ShadingKernel extends AbstractOpenCLKernel<ShadingKernelParams> {
 
     @Override
     protected long[] getWorkgroupSize() {
-        return new long[]{ getParams().getBuffers().getRaysBuffers().getRays() };
+        return new long[]{ getParams().getViewRaysBuffer().getRays() };
     }
 }
 

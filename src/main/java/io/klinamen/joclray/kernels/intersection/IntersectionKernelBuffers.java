@@ -48,7 +48,7 @@ public class IntersectionKernelBuffers implements AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         clReleaseMemObject(hitMap);
         clReleaseMemObject(hitDistances);
         clReleaseMemObject(hitNormals);

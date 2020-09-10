@@ -58,7 +58,7 @@ public class RaysBuffers implements AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         clReleaseMemObject(rayOrigins);
         clReleaseMemObject(rayDirections);
     }

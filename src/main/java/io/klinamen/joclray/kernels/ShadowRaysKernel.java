@@ -53,7 +53,7 @@ public class ShadowRaysKernel extends AbstractOpenCLKernel<ShadowRaysKernelParam
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         super.close();
 
         if(lightPos != null) {

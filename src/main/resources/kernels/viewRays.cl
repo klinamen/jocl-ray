@@ -1,6 +1,6 @@
 __kernel void viewRays(const float2 frameSize, const float4 e, const float fov_rad,
-                              __global float4 *origin,
-                              __global float4 *direction) {
+                              __global float4 *origins,
+                              __global float4 *directions) {
   int py = get_global_id(0); // image-plane row
   int px = get_global_id(1); // image-plane col
 
@@ -17,6 +17,6 @@ __kernel void viewRays(const float2 frameSize, const float4 e, const float fov_r
   // ray index
   int i = (int)frameSize.x * py + px;
 
-  direction[i] = rd;
-  origin[i] = e;
+  directions[i] = rd;
+  origins[i] = e;
 }

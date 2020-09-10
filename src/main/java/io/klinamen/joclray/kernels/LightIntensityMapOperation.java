@@ -4,7 +4,6 @@ import io.klinamen.joclray.kernels.intersection.IntersectResult;
 import io.klinamen.joclray.kernels.intersection.IntersectionKernelBuffers;
 import io.klinamen.joclray.kernels.intersection.IntersectionOperation;
 import io.klinamen.joclray.kernels.intersection.IntersectionOperationParams;
-import io.klinamen.joclray.kernels.intersection.factory.IntersectionKernelFactory;
 import io.klinamen.joclray.scene.LightElement;
 import io.klinamen.joclray.util.FloatVec4;
 import org.jocl.cl_command_queue;
@@ -12,12 +11,15 @@ import org.jocl.cl_context;
 
 public class LightIntensityMapOperation implements OpenCLKernel<LightIntensityMapOperationParams> {
     private final cl_context context;
-    private final IntersectionKernelFactory intersectionKernelFactory;
+    private final ShadowRaysKernel shadowRaysKernel;
+    private final IntersectionOperation intersectionOperation;
+
     private LightIntensityMapOperationParams params;
 
-    public LightIntensityMapOperation(cl_context context, IntersectionKernelFactory intersectionKernelFactory) {
+    public LightIntensityMapOperation(cl_context context, ShadowRaysKernel shadowRaysKernel, IntersectionOperation intersectionOperation) {
         this.context = context;
-        this.intersectionKernelFactory = intersectionKernelFactory;
+        this.shadowRaysKernel = shadowRaysKernel;
+        this.intersectionOperation = intersectionOperation;
     }
 
     @Override
@@ -30,16 +32,15 @@ public class LightIntensityMapOperation implements OpenCLKernel<LightIntensityMa
         final int rays = params.getViewRaysBuffer().getRays();
 
         RaysGenerationResult shadowRaysResult = new RaysGenerationResult(rays * params.getLights().size());
-        RaysBuffers shadowRaysBuffer = RaysBuffers.create(context, shadowRaysResult);
 
-        ShadowRaysKernelParams shadowRaysKernelParams = new ShadowRaysKernelParams(params.getLights(), params.getViewRaysBuffer(), params.getViewRaysIntersectionsBuffers(), shadowRaysBuffer);
-        ShadowRaysKernel shadowRaysKernel = new ShadowRaysKernel(context);
-        shadowRaysKernel.setParams(shadowRaysKernelParams);
+        try (RaysBuffers shadowRaysBuffer = RaysBuffers.create(context, shadowRaysResult)) {
+            shadowRaysKernel.setParams(new ShadowRaysKernelParams(params.getLights(), params.getViewRaysBuffer(), params.getViewRaysIntersectionsBuffers(), shadowRaysBuffer));
 
-        // compute shadow rays, for each primary ray and light
-        shadowRaysKernel.enqueue(queue);
+            // compute shadow rays, for each primary ray and light
+            shadowRaysKernel.enqueue(queue);
 
-        shadowRaysBuffer.readTo(queue, shadowRaysResult);
+            shadowRaysBuffer.readTo(queue, shadowRaysResult);
+        }
 
         float[] lightIntensityMap = new float[rays * params.getLights().size()];
 
@@ -57,17 +58,18 @@ public class LightIntensityMapOperation implements OpenCLKernel<LightIntensityMa
             System.arraycopy(shadowRaysResult.getRayDirections(), i * shDirs.length, shDirs, 0, shDirs.length);
 
             RaysGenerationResult shRes = new RaysGenerationResult(shOrigins, shDirs);
-            RaysBuffers lightShadowRays = RaysBuffers.create(context, shRes);
 
             IntersectResult shadowIntersect = new IntersectResult(rays);
-            IntersectionKernelBuffers intersectionKernelBuffers = IntersectionKernelBuffers.fromResult(context, shadowIntersect);
-            IntersectionOperationParams intersectionOperationParams = new IntersectionOperationParams(params.getSurfaces(), lightShadowRays, intersectionKernelBuffers);
-            IntersectionOperation intersectionOperation = new IntersectionOperation(intersectionKernelFactory);
-            intersectionOperation.setParams(intersectionOperationParams);
+            try (IntersectionKernelBuffers intersectionKernelBuffers = IntersectionKernelBuffers.fromResult(context, shadowIntersect);
+                 RaysBuffers lightShadowRays = RaysBuffers.create(context, shRes)
+            ) {
+                IntersectionOperationParams intersectionOperationParams = new IntersectionOperationParams(params.getSurfaces(), lightShadowRays, intersectionKernelBuffers);
+                intersectionOperation.setParams(intersectionOperationParams);
 
-            intersectionOperation.enqueue(queue);
+                intersectionOperation.enqueue(queue);
 
-            intersectionKernelBuffers.readTo(queue, shadowIntersect);
+                intersectionKernelBuffers.readTo(queue, shadowIntersect);
+            }
 
             // TODO move to the GPU?
             int[] hitMap = shadowIntersect.getHitMap();
