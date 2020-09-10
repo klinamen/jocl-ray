@@ -44,7 +44,7 @@ __kernel void shading(__global float4 *rayOrigins,
     if(angle > 0){
       // Spotlight
       float4 ld = normalize(lightDirection[i]);
-      float cosphi = cospi(acos(dot(-l, ld)) / angle);
+      float cosphi = cospi(acos(dot(-l, ld)) / (2 * angle));
       intensity = intensity * (cosphi < 0 ? 0 : pow(cosphi, 1));
     }
 

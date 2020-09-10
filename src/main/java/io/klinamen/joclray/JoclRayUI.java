@@ -3,7 +3,7 @@ package io.klinamen.joclray;
 import io.klinamen.joclray.rendering.FullRenderer;
 import io.klinamen.joclray.rendering.Renderer;
 import io.klinamen.joclray.rendering.VisibilityRenderer;
-import io.klinamen.joclray.samples.Scene1;
+import io.klinamen.joclray.samples.Scene2;
 import io.klinamen.joclray.scene.Scene;
 import picocli.CommandLine;
 
@@ -162,8 +162,8 @@ public class JoclRayUI implements Runnable {
     }
 
     private Scene buildScene() {
-        Scene scene = Scene1.build();
-//        Scene scene = Scene2.build();
+//        Scene scene = Scene1.build();
+        Scene scene = Scene2.build();
 
         scene.getCamera()
                 .setFrameWidth(image.getWidth())
