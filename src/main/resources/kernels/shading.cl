@@ -73,9 +73,17 @@ __kernel void shading(__global float4 *rayOrigins,
   // update rays with reflected ones
   rayOrigins[ray] = rro;
   rayDirections[ray] = rrd;
+  hitMap[ray] = -1; // resets hitMap for each bounce
 
   // accumulate kr of the hit object for this ray
   // c(i) = bp(i) + kr(i) * c(i-1) = bp(i) + kr(i) * (bp(i-1) + kr(i-1) * c(i-2)) = ...
   // = bp(0) + kr(1) * bp(1) + kr(1) * kr(2) * bp(2) + ...
   krPrev[ray] *= kr[hitElementId];
+
+  // if(ray == 1072389){
+  //   float4 cc = krPrev[ray] * c;
+  //   printf("Shading: ray=%d, hm=%d, ro=(%f, %f, %f), rd=(%f, %f, %f), rro=(%f, %f, %f), rrd=(%f, %f, %f), cc=(%f, %f, %f), c=(%f, %f, %f)\n", 
+  //   ray, hitElementId, ro.x, ro.y, ro.x, rd.x, rd.y, rd.z, rro.x, rro.y, rro.z, rrd.x, rrd.y, rrd.z,
+  //   cc.x, cc.y, cc.z, colors[ray].x, colors[ray].y, colors[ray].z);
+  // }
 }
