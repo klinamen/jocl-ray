@@ -44,8 +44,13 @@ __kernel void shading(__global float4 *rayOrigins,
     if(angle > 0){
       // Spotlight
       float4 ld = normalize(lightDirection[i]);
-      float cosphi = cospi(acos(dot(-l, ld)) / (2 * angle));
-      intensity = intensity * (cosphi < 0 ? 0 : pow(cosphi, 1));
+      float b = acos(dot(-l, ld));
+      float kAtt = (b > angle/2 ? 0 : pow(cospi(b/angle), 1.0f));      
+      intensity = intensity * kAtt;
+
+      // if(i==1 && ray % 2 == 0){
+      //   printf("pix=%d, light_i=%d, b=%f, kAtt=%f\n", ray, i, b, kAtt);
+      // }
     }
 
     // Lambertian component
