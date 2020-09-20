@@ -1,3 +1,6 @@
+#define BIAS 0.001f
+// #define DEBUG_RAY 782682
+
 __kernel void shading(__global float4 *rayOrigins,
                       __global float4 *rayDirections,
                       __global float4 *hitNormals,
@@ -26,18 +29,32 @@ __kernel void shading(__global float4 *rayOrigins,
   float4 ro = rayOrigins[ray];
   float4 rd = rayDirections[ray];
 
+  // material properties
+  float4 elKd = kd[hitElementId];
+  float4 elKs = ks[hitElementId];
+  float4 elKr = kr[hitElementId];
+  float elPh = phongExp[hitElementId];
+
+  float4 krPrevRay = krPrev[ray];
+
   // hit info
   float t = hitDistances[ray];
   float4 p = ro + t * rd;
-  float4 n = normalize(hitNormals[ray]);
+  float4 n = hitNormals[ray];
 
   // Ambient component
-  float4 c = kd[hitElementId] * aLightIntensity;
+  float4 c = elKd * aLightIntensity;
 
   // TODO parallelize as for intersections
   for (int i = 0; i < nLights; i++) {
     float intensity = lightIntensityMap[i * rays + ray];
     float4 l = normalize(lightPos[i] - p);
+
+#ifdef DEBUG_RAY
+    if(ray == DEBUG_RAY){
+      printf("Shading ray=%d: light=%d, int=%f\n", ray, i, intensity);
+    }
+#endif
 
     // TODO hacky
     float angle = lightAngle[i];
@@ -45,8 +62,15 @@ __kernel void shading(__global float4 *rayOrigins,
       // Spotlight
       float4 ld = normalize(lightDirection[i]);
       float b = acos(dot(-l, ld));
-      float kAtt = (b > angle/2 ? 0 : pow(cospi(b/angle), 1.0f));      
+      // float kAtt = (b > angle/2 ? 0 : pow(cospi(b/angle), 1.0f));
+      float kAtt = (b <= angle/2) * pow(cospi(b/angle), 1.0f);
       intensity = intensity * kAtt;
+
+#ifdef DEBUG_RAY
+    if(ray == DEBUG_RAY){
+      printf("Shading ray=%d: Spotlight: kAtt=%f, int=%f\n", ray, kAtt, intensity);
+    }
+#endif
 
       // if(i==1 && ray % 2 == 0){
       //   printf("pix=%d, light_i=%d, b=%f, kAtt=%f\n", ray, i, b, kAtt);
@@ -54,21 +78,20 @@ __kernel void shading(__global float4 *rayOrigins,
     }
 
     // Lambertian component
-    c += kd[hitElementId] * intensity * max((float)0, dot(n, l));
+    c += elKd * intensity * max((float)0, dot(n, l));
 
     // Blinn-Phong component
     float4 h = normalize(-rd + l);
-    c += ks[hitElementId] * intensity *
-         pow(max((float)0, dot(n, h)), phongExp[hitElementId]);
+    c += elKs * intensity * pow(max((float)0, dot(n, h)), elPh);
   }
 
   // Final color. For primary rays, krPrev[ray] is initialized to 1.
-  colors[ray] += krPrev[ray] * c;
+  colors[ray] += krPrevRay * c;
 
   // bounce rays!
   // TODO move to another kernel
   float4 rrd = normalize(rd - 2 * dot(rd, n) * n);
-  float4 rro = p + 0.001f * n;  // bias to avoid self-intersections
+  float4 rro = p + BIAS * n;  // bias to avoid self-intersections
 
   // update rays with reflected ones
   rayOrigins[ray] = rro;
@@ -78,12 +101,16 @@ __kernel void shading(__global float4 *rayOrigins,
   // accumulate kr of the hit object for this ray
   // c(i) = bp(i) + kr(i) * c(i-1) = bp(i) + kr(i) * (bp(i-1) + kr(i-1) * c(i-2)) = ...
   // = bp(0) + kr(1) * bp(1) + kr(1) * kr(2) * bp(2) + ...
-  krPrev[ray] *= kr[hitElementId];
+  krPrev[ray] *= elKr;
 
-  // if(ray == 1072389){
-  //   float4 cc = krPrev[ray] * c;
-  //   printf("Shading: ray=%d, hm=%d, ro=(%f, %f, %f), rd=(%f, %f, %f), rro=(%f, %f, %f), rrd=(%f, %f, %f), cc=(%f, %f, %f), c=(%f, %f, %f)\n", 
-  //   ray, hitElementId, ro.x, ro.y, ro.x, rd.x, rd.y, rd.z, rro.x, rro.y, rro.z, rrd.x, rrd.y, rrd.z,
-  //   cc.x, cc.y, cc.z, colors[ray].x, colors[ray].y, colors[ray].z);
-  // }
+#ifdef DEBUG_RAY
+  if(ray == DEBUG_RAY){
+    float4 cc = krPrevRay * c;
+    printf("Shading ray=%d: hm=%d, ro=(%f, %f, %f), rd=(%f, %f, %f), rro=(%f, %f, %f), rrd=(%f, %f, %f), cc=(%f, %f, %f), c=(%f, %f, %f)\n", 
+    ray, hitElementId, ro.x, ro.y, ro.x, rd.x, rd.y, rd.z, rro.x, rro.y, rro.z, rrd.x, rrd.y, rrd.z,
+    cc.x, cc.y, cc.z, colors[ray].x, colors[ray].y, colors[ray].z);
+  
+    printf("  kd=(%f, %f, %f); ks=(%f, %f, %f); kr=(%f, %f, %f); ph=%f\n", elKd.x, elKd.y, elKd.z, elKs.x, elKs.y, elKs.z, elKr.x, elKr.y, elKr.z, elPh);
+  }
+#endif
 }

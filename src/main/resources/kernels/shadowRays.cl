@@ -1,3 +1,6 @@
+#define BIAS 0.001f
+// #define DEBUG_RAY 782682
+
 __kernel void
 shadowRays(__global float4 *rayOrigin, __global float4 *rayDirections,
            __global float4 *hitNormals, __global float *hitDistance,
@@ -28,14 +31,15 @@ shadowRays(__global float4 *rayOrigin, __global float4 *rayDirections,
   int shadowIndex = lightIndex * rays + ray;
 
   float4 srd = normalize(lightPos[lightIndex] - p);
-  float4 sro = p + 0.001f * n;  // bias to avoid self-shadows
+  float4 sro = p + BIAS * n;  // bias to avoid self-shadows
 
   shadowRayOrigin[shadowIndex] = sro;
   shadowRayDir[shadowIndex] = srd;
 
-  // int pix = 387072;
-  // if (ray == pix) {
-  //   printf("Shadow: pix=%d; l=%d; vro=(%f, %f, %f); vrd=(%f, %f, %f); sro=(%f, %f, %f); srd=(%f, %f, %f)\n",
-  //          pix, lightIndex, ro.x, ro.y, ro.z, rd.x, rd.y, rd.z, sro.x, sro.y, sro.z, srd.x, srd.y, srd.z);
-  // }
+#ifdef DEBUG_RAY
+  if (ray == DEBUG_RAY) {
+    printf("Shadow: ray=%d; l=%d; vro=(%f, %f, %f); vrd=(%f, %f, %f); sro=(%f, %f, %f); srd=(%f, %f, %f)\n",
+           ray, lightIndex, ro.x, ro.y, ro.z, rd.x, rd.y, rd.z, sro.x, sro.y, sro.z, srd.x, srd.y, srd.z);
+  }
+#endif
 }

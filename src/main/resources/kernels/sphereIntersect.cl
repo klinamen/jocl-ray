@@ -44,7 +44,7 @@ __kernel void sphereIntersect(__global float4 *rayOrigins,
 
   // if (ray == 1072389) {
   //   float4 p = ro + hitDistance[ray] * rd;
-  //   printf("Sphere %d: pix=%d; hm=%d; hd=%f; hn=(%f, %f, %f); p=(%f, %f, %f); ro=(%f, %f, %f); rd=(%f, %f, %f)\n",
+  //   printf("Sphere %d: ray=%d; hm=%d; hd=%f; hn=(%f, %f, %f); p=(%f, %f, %f); ro=(%f, %f, %f); rd=(%f, %f, %f)\n",
   //          elementIndex, ray, hitMap[ray], hitDistance[ray], hitNormals[ray].x, hitNormals[ray].y, hitNormals[ray].z, 
   //          p.x, p.y, p.z, ro.x, ro.y, ro.z, rd.x, rd.y, rd.z);
   // }

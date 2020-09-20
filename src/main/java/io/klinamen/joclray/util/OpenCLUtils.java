@@ -21,7 +21,12 @@ public class OpenCLUtils {
     }
 
     public static String getKernelSource(String kernelName) throws IOException {
-        try (InputStream inputStream = OpenCLUtils.class.getResourceAsStream("/kernels/" + kernelName + ".cl")) {
+        String resourceName = "/kernels/" + kernelName + ".cl";
+        try (InputStream inputStream = OpenCLUtils.class.getResourceAsStream(resourceName)) {
+            if(inputStream == null){
+                throw new RuntimeException(String.format("Unable ti find kernel source for resource '%s'.", resourceName));
+            }
+
             Scanner s = new Scanner(inputStream).useDelimiter("\\A");
             String result = s.hasNext() ? s.next() : "";
             return result;

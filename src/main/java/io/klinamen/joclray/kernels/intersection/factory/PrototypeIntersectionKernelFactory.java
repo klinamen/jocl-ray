@@ -1,13 +1,11 @@
 package io.klinamen.joclray.kernels.intersection.factory;
 
-import io.klinamen.joclray.geom.Box;
-import io.klinamen.joclray.geom.Plane;
-import io.klinamen.joclray.geom.Sphere;
-import io.klinamen.joclray.geom.Surface;
+import io.klinamen.joclray.geom.*;
 import io.klinamen.joclray.kernels.intersection.AbstractIntersectionKernel;
 import io.klinamen.joclray.kernels.intersection.impl.BoxIntersectionKernel;
 import io.klinamen.joclray.kernels.intersection.impl.PlaneIntersectionKernel;
 import io.klinamen.joclray.kernels.intersection.impl.SphereIntersectionKernel;
+import io.klinamen.joclray.kernels.intersection.impl.TriangleMeshIntersectionKernel;
 import org.jocl.cl_context;
 
 import java.util.HashMap;
@@ -21,6 +19,7 @@ public class PrototypeIntersectionKernelFactory implements IntersectionKernelFac
         add(Sphere.class, () -> new SphereIntersectionKernel(context));
         add(Plane.class, () -> new PlaneIntersectionKernel(context));
         add(Box.class, () -> new BoxIntersectionKernel(context));
+        add(TriangleMesh.class, () -> new TriangleMeshIntersectionKernel(context));
     }
 
     private <T extends Surface> void add(Class<T> surfaceClass, Supplier<AbstractIntersectionKernel<T>> kernel) {

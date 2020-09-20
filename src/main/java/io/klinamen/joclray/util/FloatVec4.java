@@ -1,5 +1,7 @@
 package io.klinamen.joclray.util;
 
+import java.util.Collection;
+
 public class FloatVec4 {
     public static int DIM = 4;
 
@@ -61,5 +63,15 @@ public class FloatVec4 {
         }
 
         return new FloatVec4(aValues[offset], aValues[offset + 1], aValues[offset + 2], aValues[offset + 3]);
+    }
+
+    public static float[] flatten(Collection<FloatVec4> values){
+        float[] out = new float[values.size() * FloatVec4.DIM];
+        int i=0;
+        for (FloatVec4 item : values) {
+            System.arraycopy(item.getArray(), 0, out, i * FloatVec4.DIM, FloatVec4.DIM);
+            i++;
+        }
+        return out;
     }
 }

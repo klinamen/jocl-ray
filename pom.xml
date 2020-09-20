@@ -59,5 +59,15 @@
             <artifactId>picocli</artifactId>
             <version>4.5.1</version>
         </dependency>
+        <dependency>
+            <groupId>de.javagl</groupId>
+            <artifactId>obj</artifactId>
+            <version>0.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ejml</groupId>
+            <artifactId>all</artifactId>
+            <version>0.30</version>
+        </dependency>
     </dependencies>
 </project>
