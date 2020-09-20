@@ -41,6 +41,26 @@ public class FloatVec4 {
         return v[3];
     }
 
+    public FloatVec4 setX(float x) {
+        v[0] = x;
+        return this;
+    }
+
+    public FloatVec4 setY(float y) {
+        v[1] = y;
+        return this;
+    }
+
+    public FloatVec4 setZ(float z) {
+        v[2] = z;
+        return this;
+    }
+
+    public FloatVec4 setW(float w) {
+        v[3] = w;
+        return this;
+    }
+
     public FloatVec4 sum(FloatVec4 v1) {
         return new FloatVec4(getX() + v1.getX(), getY() + v1.getY(), getZ() + v1.getZ(), getW() + v1.getW());
     }
@@ -51,6 +71,28 @@ public class FloatVec4 {
 
     public FloatVec4 minus(FloatVec4 v1) {
         return new FloatVec4(getX() - v1.getX(), getY() - v1.getY(), getZ() - v1.getZ(), getW() - v1.getW());
+    }
+
+    public FloatVec4 copy(){
+        return new FloatVec4(getX(), getY(), getZ(), getW());
+    }
+
+    public FloatVec4 min(FloatVec4 v1) {
+        return new FloatVec4(
+                Math.min(getX(), v1.getX()),
+                Math.min(getY(), v1.getY()),
+                Math.min(getZ(), v1.getZ()),
+                Math.min(getW(), v1.getW())
+        );
+    }
+
+    public FloatVec4 max(FloatVec4 v1) {
+        return new FloatVec4(
+                Math.max(getX(), v1.getX()),
+                Math.max(getY(), v1.getY()),
+                Math.max(getZ(), v1.getZ()),
+                Math.max(getW(), v1.getW())
+        );
     }
 
     public float length() {
@@ -65,9 +107,9 @@ public class FloatVec4 {
         return new FloatVec4(aValues[offset], aValues[offset + 1], aValues[offset + 2], aValues[offset + 3]);
     }
 
-    public static float[] flatten(Collection<FloatVec4> values){
+    public static float[] flatten(Collection<FloatVec4> values) {
         float[] out = new float[values.size() * FloatVec4.DIM];
-        int i=0;
+        int i = 0;
         for (FloatVec4 item : values) {
             System.arraycopy(item.getArray(), 0, out, i * FloatVec4.DIM, FloatVec4.DIM);
             i++;

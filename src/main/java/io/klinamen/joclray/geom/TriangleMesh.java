@@ -72,6 +72,24 @@ public class TriangleMesh extends Surface {
         return faceIndices.size() / VPF;
     }
 
+    public Box getBoundingBox(){
+        Box bb = null;
+        for (FloatVec4 v : vertices) {
+            if(bb == null){
+                bb = new Box(v.copy(), v.copy());
+            } else {
+                bb.setVertexMin(bb.getVertexMin().min(v));
+                bb.setVertexMax(bb.getVertexMax().max(v));
+            }
+        }
+
+        if(bb == null){
+            throw new IllegalStateException("Unable to find bounding box. No vertices are defined.");
+        }
+
+        return bb;
+    }
+
     public TriangleMesh transform(Transformation t){
         vertices = vertices.stream()
                 .map(t::apply)
