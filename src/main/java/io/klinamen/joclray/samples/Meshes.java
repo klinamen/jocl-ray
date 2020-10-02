@@ -14,6 +14,14 @@ public class Meshes {
         return load("/meshes/teapot.obj");
     }
 
+//    public static TriangleMesh armadillo() {
+//        return load("/meshes/armadillo.obj");
+//    }
+//
+//    public static TriangleMesh apple() {
+//        return load("/meshes/apple.obj");
+//    }
+
     public static TriangleMesh teapotLow() {
         return load("/meshes/teapot-low.obj");
     }

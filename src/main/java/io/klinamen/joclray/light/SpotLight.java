@@ -4,6 +4,7 @@ import io.klinamen.joclray.util.FloatVec4;
 
 public class SpotLight extends PointLight {
     private float angleGrad;
+    private float fallout = 1;
     private FloatVec4 direction;
 
     public float getAngleGrad() {
@@ -37,6 +38,15 @@ public class SpotLight extends PointLight {
     @Override
     public SpotLight setPosition(FloatVec4 position) {
         super.setPosition(position);
+        return this;
+    }
+
+    public float getFallout() {
+        return fallout;
+    }
+
+    public SpotLight setFallout(float fallout) {
+        this.fallout = fallout;
         return this;
     }
 }

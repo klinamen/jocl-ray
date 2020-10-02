@@ -8,6 +8,7 @@ JOCLRay is an attempt to implement basic ray tracing on GPU via OpenCL kernels, 
 - Supported light types: Point light, Spotlight with angle and attenuation.
 - "Shading" renderer implementing Blinn-Phong lighting model with shadows and an arbitrary number of reflection bounces.
 - "Visibility" renderer for visualizing intersection with view rays only.
+- Octrees acceleration structure.
 
 ## How to build
 
@@ -61,6 +62,24 @@ GPU         | Rendering Time
 ----------- | -------------
 NVIDIA GeForce MX150    | 1.6s
 Intel UHD Graphics 620  | 3.5s
+
+### Scene 3
+![Image of Scene3](./sample-images/scene3.png)
+
+- FOV (grad): 48
+- 1 primary ray per-pixel
+- Lights: 1 point light, 3 spot lights
+- Objects: 8
+  - Utah Teapot (6,320 tris)
+  - Stanford Bunny low-poly (4,968 tris)
+- Reflection bounces: 4
+- Acceleration structure: Octrees
+
+Rendering times on my laptop (Intel(R) Core(TM) i7-8550U CPU @ 1.80GHz, 16GB RAM, NVIDIA GeForce MX150) for both NVIDIA and Intel GPU. Reported rendering time is the average over 10 sequential runs, discarding the first one in which compilation of OpenCL kernels happens.
+
+GPU         | Rendering Time
+----------- | -------------
+NVIDIA GeForce MX150    | 19.5s
 
 ## Limitations and Future Work
 - Extend the renderer to make use of multiple OpenCL devices.

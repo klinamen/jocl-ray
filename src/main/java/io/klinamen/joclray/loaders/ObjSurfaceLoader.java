@@ -24,10 +24,11 @@ public class ObjSurfaceLoader implements SurfaceLoader {
         // 2. Make sure that texture coordinates are not ambiguous
         // 3. Make sure that normals are not ambiguous
         // 4. Convert it to single-indexed data
-//        obj = ObjUtils.convertToRenderable(obj);
+        obj = ObjUtils.convertToRenderable(obj);
 
-        obj = ObjUtils.triangulate(obj);
-        obj = ObjUtils.makeVertexIndexed(obj);
+//        obj = ObjUtils.triangulate(obj);
+//        obj = ObjUtils.makeNormalsUnique(obj);
+//        obj = ObjUtils.makeVertexIndexed(obj);
 
         int[] aIndices = ObjData.getFaceVertexIndicesArray(obj, 3);
         List<Integer> faceIndices = Ints.asList(aIndices);

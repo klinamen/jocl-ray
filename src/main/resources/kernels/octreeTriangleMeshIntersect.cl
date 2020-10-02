@@ -4,7 +4,7 @@
 
 #define EPSILON 0.001f
 #define VPF 3
-// #define DEBUG_RAY 1020967
+// #define DEBUG_RAY 1539024
 
 inline bool aabbIntersect(float4 ro, float4 rd, float4 v0, float4 v1){
   float4 t0 = (v0 - ro) / rd;

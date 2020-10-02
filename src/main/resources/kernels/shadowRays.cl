@@ -1,5 +1,5 @@
 #define BIAS 0.001f
-// #define DEBUG_RAY 1651907
+// #define DEBUG_RAY 1539024
 
 __kernel void
 shadowRays(__global float4 *rayOrigin, __global float4 *rayDirections,

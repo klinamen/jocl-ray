@@ -1,5 +1,5 @@
 #define BIAS 0.001f
-// #define DEBUG_RAY 905232
+// #define DEBUG_RAY 1539024
 
 __kernel void shading(__global float4 *rayOrigins,
                       __global float4 *rayDirections,
@@ -13,6 +13,7 @@ __kernel void shading(__global float4 *rayOrigins,
                       __global const float *lightIntensityMap, 
                       __global const float4 *lightDirection,
                       __global const float *lightAngle, 
+                      __global const float *lightFallout, 
                       const uint nLights,
                       __global float4 *colors) {
   int ray = get_global_id(0);
@@ -60,10 +61,10 @@ __kernel void shading(__global float4 *rayOrigins,
     float angle = lightAngle[i];
     if(angle > 0){
       // Spotlight
+      float fallout = lightFallout[i];
       float4 ld = normalize(lightDirection[i]);
       float b = acos(dot(-l, ld));
-      // float kAtt = (b > angle/2 ? 0 : pow(cospi(b/angle), 1.0f));
-      float kAtt = (b <= angle/2) * pow(cospi(b/angle), 0.2f);
+      float kAtt = (b <= angle/2) * pow(cospi(b/angle), fallout);
       intensity = intensity * kAtt;
 
 #ifdef DEBUG_RAY

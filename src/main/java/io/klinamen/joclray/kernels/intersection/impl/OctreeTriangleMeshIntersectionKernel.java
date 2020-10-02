@@ -41,7 +41,7 @@ public class OctreeTriangleMeshIntersectionKernel extends AbstractIntersectionKe
 
     @Override
     protected List<cl_mem> setAdditionalKernelArgs(int a, cl_kernel kernel) {
-        // per tree node
+        // one item per tree node
         List<FloatVec4> bbMinVertices = new ArrayList<>();
         List<FloatVec4> bbMaxVertices = new ArrayList<>();
         List<Integer> faceSetOffsets = new ArrayList<>();

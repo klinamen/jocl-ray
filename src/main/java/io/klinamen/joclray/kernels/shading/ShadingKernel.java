@@ -53,6 +53,7 @@ public class ShadingKernel extends AbstractOpenCLKernel<ShadingKernelParams> {
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(buffers.getLightIntensity()));
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(buffers.getLightDirection()));
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(buffers.getLightAngleRad()));
+        clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(buffers.getLightFallout()));
         clSetKernelArg(kernel, a++, Sizeof.cl_int, Pointer.to(new int[]{getParams().getTotalLights()}));
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(buffers.getImage()));
 

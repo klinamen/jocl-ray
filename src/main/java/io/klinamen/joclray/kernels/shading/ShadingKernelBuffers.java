@@ -28,9 +28,10 @@ public class ShadingKernelBuffers implements AutoCloseable {
     private final cl_mem lightDirection;
     private final cl_mem lightAngleRad;
 
+    private final cl_mem lightFallout;
     private final cl_mem image;
 
-    private ShadingKernelBuffers(cl_mem krPrev, cl_mem kd, cl_mem ks, cl_mem kr, cl_mem phongExp, cl_mem lightPos, cl_mem lightIntensity, cl_mem lightDirection, cl_mem lightAngleRad, cl_mem image) {
+    private ShadingKernelBuffers(cl_mem krPrev, cl_mem kd, cl_mem ks, cl_mem kr, cl_mem phongExp, cl_mem lightPos, cl_mem lightIntensity, cl_mem lightDirection, cl_mem lightAngleRad, cl_mem lightFallout, cl_mem image) {
         this.krPrev = krPrev;
         this.kd = kd;
         this.ks = ks;
@@ -40,6 +41,7 @@ public class ShadingKernelBuffers implements AutoCloseable {
         this.lightIntensity = lightIntensity;
         this.lightDirection = lightDirection;
         this.lightAngleRad = lightAngleRad;
+        this.lightFallout = lightFallout;
         this.image = image;
     }
 
@@ -83,6 +85,10 @@ public class ShadingKernelBuffers implements AutoCloseable {
         return lightAngleRad;
     }
 
+    public cl_mem getLightFallout() {
+        return lightFallout;
+    }
+
     public static ShadingKernelBuffers create(cl_context context, int rays, Scene scene, float[] lightIntensityMap, float[] imageBuffer) {
         cl_mem image = OpenCLUtils.allocateReadWriteMem(context, imageBuffer);
 
@@ -121,6 +127,16 @@ public class ShadingKernelBuffers implements AutoCloseable {
             return 0f;
         }));
 
+        // TODO hacky
+        cl_mem lightFallout = OpenCLUtils.allocateReadOnlyMem(context, lights.getFloats(x -> {
+            PointLight light = x.getLight();
+            if(light instanceof SpotLight){
+                return ((SpotLight) light).getFallout();
+            }
+
+            return 0f;
+        }));
+
         return new ShadingKernelBuffers(
                 krPrev,
                 kd,
@@ -129,7 +145,7 @@ public class ShadingKernelBuffers implements AutoCloseable {
                 phongExp,
                 lightPos,
                 lightIntensity,
-                lightDirection, lightAngleRad, image
+                lightDirection, lightAngleRad, lightFallout, image
         );
     }
 
