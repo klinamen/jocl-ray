@@ -19,7 +19,7 @@ public class IntersectionOperation implements OpenCLKernel<IntersectionOperation
     private Map<Class<? extends Surface>, ElementSet<SurfaceElement<Surface>>> surfacesGroups;
     private IntersectionOperationParams params;
 
-    private final Map<Class<? extends Surface>, AbstractIntersectionKernel<?>> kernelsCache = new HashMap<>();
+    private final Map<Class<? extends Surface>, IntersectionKernel<?>> kernelsCache = new HashMap<>();
 
     public IntersectionOperation(IntersectionKernelFactory factory) {
         this.factory = factory;
@@ -32,7 +32,7 @@ public class IntersectionOperation implements OpenCLKernel<IntersectionOperation
         this.kernelsCache.clear();
     }
 
-    private Map<Class<? extends Surface>, ElementSet<SurfaceElement<Surface>>> buildSurfaceGroups(){
+    private Map<Class<? extends Surface>, ElementSet<SurfaceElement<Surface>>> buildSurfaceGroups() {
         Map<Class<? extends Surface>, SortedMap<Integer, SurfaceElement<Surface>>> result = new HashMap<>();
 
         this.params.getSurfaces()
@@ -46,22 +46,25 @@ public class IntersectionOperation implements OpenCLKernel<IntersectionOperation
                 .collect(Collectors.toMap(Map.Entry::getKey, x -> new ElementSet<>(x.getValue())));
     }
 
-    private AbstractIntersectionKernel<?> getKernel(Class<? extends Surface> surfaceType){
+    private IntersectionKernel<?> getKernel(Class<? extends Surface> surfaceType) {
+        // TODO review
 //        if(!kernelsCache.containsKey(surfaceType)){
-            ElementSet<SurfaceElement<Surface>> surfaces = surfacesGroups.get(surfaceType);
-            AbstractIntersectionKernel<?> kernel = factory.getKernel(surfaceType);
-            IntersectionKernelParams kernelParams = new IntersectionKernelParams(surfaces, this.params.getIntersectionKernelBuffers(), this.params.getRaysBuffers());
-            kernel.setParams(kernelParams);
+        ElementSet<SurfaceElement<Surface>> surfaces = surfacesGroups.get(surfaceType);
+        IntersectionKernel<?> kernel = factory.getKernel(surfaceType);
+        IntersectionKernelParams kernelParams = new IntersectionKernelParams(surfaces, this.params.getIntersectionKernelBuffers(), this.params.getRaysBuffers());
+        kernel.setParams(kernelParams);
 
-            kernelsCache.put(surfaceType, kernel);
+//            kernelsCache.put(surfaceType, kernel);
 //        }
 
-        return kernelsCache.get(surfaceType);
+//        return kernelsCache.get(surfaceType);
+
+        return kernel;
     }
 
     @Override
     public void enqueue(cl_command_queue queue) {
-        if(params == null){
+        if (params == null) {
             throw new RuntimeException("Operation params cannot be null.");
         }
 

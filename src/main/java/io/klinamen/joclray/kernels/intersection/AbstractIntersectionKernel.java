@@ -9,7 +9,7 @@ import java.util.List;
 import static org.jocl.CL.clCreateKernel;
 import static org.jocl.CL.clSetKernelArg;
 
-public abstract class AbstractIntersectionKernel<T extends Surface> extends AbstractOpenCLKernel<IntersectionKernelParams<T>> {
+public abstract class AbstractIntersectionKernel<T extends Surface> extends AbstractOpenCLKernel<IntersectionKernelParams<T>> implements IntersectionKernel<T> {
     private List<cl_mem> additionalBuffers;
 
     public AbstractIntersectionKernel(cl_context context) {

@@ -1,5 +1,7 @@
 package io.klinamen.joclray.geom;
 
+import io.klinamen.joclray.geom.bvh.Face;
+import io.klinamen.joclray.geom.bvh.FaceSet;
 import io.klinamen.joclray.transformations.Transformation;
 import io.klinamen.joclray.util.FloatVec4;
 
@@ -72,22 +74,29 @@ public class TriangleMesh extends Surface {
         return faceIndices.size() / VPF;
     }
 
-    public Box getBoundingBox(){
-        Box bb = null;
-        for (FloatVec4 v : vertices) {
-            if(bb == null){
-                bb = new Box(v.copy(), v.copy());
-            } else {
-                bb.setVertexMin(bb.getVertexMin().min(v));
-                bb.setVertexMax(bb.getVertexMax().max(v));
-            }
+    public FaceSet getFaceSet(){
+        FaceSet faceSet = new FaceSet();
+        List<Integer> indices = getFaceIndices();
+        for (int j = 0; j < indices.size(); j+=VPF) {
+            List<Integer> vIndices = indices.subList(j, j + VPF);
+            faceSet.addFace(new Face(this, vIndices));
         }
+        return faceSet;
+    }
 
-        if(bb == null){
+    public AABB getBoundingBox(){
+        if(getVertices().size() == 0) {
             throw new IllegalStateException("Unable to find bounding box. No vertices are defined.");
         }
 
-        return bb;
+        FloatVec4 min = null;
+        FloatVec4 max = null;
+        for (FloatVec4 v : getVertices()) {
+            min = v.min(min);
+            max = v.max(max);
+        }
+
+        return new AABB(min, max);
     }
 
     public TriangleMesh transform(Transformation t){

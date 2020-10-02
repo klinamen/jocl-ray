@@ -1,10 +1,10 @@
 package io.klinamen.joclray.kernels;
 
 import io.klinamen.joclray.util.OpenCLUtils;
-import org.jocl.cl_command_queue;
-import org.jocl.cl_context;
-import org.jocl.cl_kernel;
-import org.jocl.cl_program;
+import org.jocl.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.jocl.CL.*;
 
@@ -16,12 +16,25 @@ public abstract class AbstractOpenCLKernel<TParams> implements OpenCLKernel<TPar
 
     private TParams kernelParams;
 
+    private final List<cl_mem> buffers = new ArrayList<>();
+    private final List<String> compilerOptions = new ArrayList<>();
+
     public AbstractOpenCLKernel(cl_context context) {
         this.context = context;
     }
 
     protected cl_context getContext() {
         return context;
+    }
+
+    protected cl_mem track(cl_mem buffer){
+        buffers.add(buffer);
+        return buffer;
+    }
+
+    protected void releaseTrackedBuffers(){
+        buffers.forEach(CL::clReleaseMemObject);
+        buffers.clear();
     }
 
     @Override
@@ -38,10 +51,37 @@ public abstract class AbstractOpenCLKernel<TParams> implements OpenCLKernel<TPar
         return kernelParams;
     }
 
+    protected void addCompilerOption(String option){
+        compilerOptions.add(option);
+        releaseProgram();
+    }
+
+    protected void clearCompilerOptions(){
+        compilerOptions.clear();
+        releaseProgram();
+    }
+
+    private void releaseProgram(){
+        releaseKernel();
+
+        if (program != null) {
+            clReleaseProgram(program);
+            program = null;
+        }
+    }
+
+    private void releaseKernel(){
+        if (kernel != null) {
+            clReleaseKernel(kernel);
+            kernel = null;
+        }
+    }
+
     protected final cl_program getProgram() {
         if (program == null) {
             program = OpenCLUtils.getProgramForKernel(getContext(), getKernelName());
-            clBuildProgram(program, 0, null, null, null, null);
+            String options = String.join(" ", compilerOptions);
+            clBuildProgram(program, 0, null, options, null, null);
         }
 
         return program;
@@ -76,12 +116,7 @@ public abstract class AbstractOpenCLKernel<TParams> implements OpenCLKernel<TPar
 
     @Override
     public void close() {
-        if (kernel != null) {
-            clReleaseKernel(kernel);
-        }
-
-        if (program != null) {
-            clReleaseProgram(program);
-        }
+        releaseTrackedBuffers();
+        releaseProgram();
     }
 }

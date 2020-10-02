@@ -24,9 +24,19 @@ public class IntersectionsDisplay {
     public void update(BufferedImage image) {
         int[] hitMap = intersectResult.getHitMap();
         for (int i = 0; i < hitMap.length; i++) {
+            int x = i % (int) scene.getCamera().getFrameWidth();
+            int y = i / (int) scene.getCamera().getFrameWidth();
+
+//            if(i == 646036){
+//                // debug pixel marker
+//                image.getRaster().setPixel(x, y, new int[]{255, 0, 0});
+//                image.getRaster().setPixel(x, y+1, new int[]{255, 0, 0});
+//                image.getRaster().setPixel(x, y-1, new int[]{255, 0, 0});
+//                image.getRaster().setPixel(x+1, y, new int[]{255, 0, 0});
+//                image.getRaster().setPixel(x-1, y, new int[]{255, 0, 0});
+//            } else
+
             if (hitMap[i] >= 0) {
-                int x = i % (int) scene.getCamera().getFrameWidth();
-                int y = i / (int) scene.getCamera().getFrameWidth();
                 image.getRaster().setPixel(x, y, getColor(hitMap[i]));
             }
         }

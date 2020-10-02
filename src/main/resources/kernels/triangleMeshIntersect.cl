@@ -1,7 +1,7 @@
 // #define CULLING
 #define EPSILON 0.001f
 #define VPF 3
-// #define DEBUG_RAY 782682
+// #define DEBUG_RAY 1020967
 
 __kernel void
 triangleMeshIntersect(__global float4 *rayOrigins, __global float4 *rayDirections,
@@ -27,6 +27,13 @@ triangleMeshIntersect(__global float4 *rayOrigins, __global float4 *rayDirection
   float4 v0 = vertices[v0Index];
   float4 v1 = vertices[v1Index];
   float4 v2 = vertices[v2Index];
+
+// #ifdef DEBUG_RAY
+//     if (ray == DEBUG_RAY) {
+//       printf("testing f=%d, el=%d: %d:(%f, %f, %f), %d:(%f, %f, %f), %d:(%f, %f, %f)\n", 
+//         elementIndex, elementIds[elementIndex], v0Index, v0.x, v0.y, v0.z, v1Index, v1.x, v1.y, v1.z, v2Index, v2.x, v2.y, v2.z);
+//     }
+// #endif
 
   float4 e1 = v1 - v0;
   float4 e2 = v2 - v0;
@@ -88,7 +95,7 @@ triangleMeshIntersect(__global float4 *rayOrigins, __global float4 *rayDirection
     float4 nv2 = vertexNormals[v2Index];
     float4 n = normalize((1 - u - v) * nv0 + u * nv1 + v * nv2);
     
-    hitMap[ray] = elementIds[elementIndex];
+    hitMap[ray] = elementIds[elementIndex * VPF];
     hitNormals[ray] = n;
     hitDistance[ray] = t;
   }
@@ -98,8 +105,8 @@ triangleMeshIntersect(__global float4 *rayOrigins, __global float4 *rayDirection
     //printf("v0=(%f,%f,%f); v1=(%f,%f,%f); v2=(%f,%f,%f)\n", v0.x, v0.y, v0.z, v1.x, v1.y, v1.z, v2.x, v2.y, v2.z);
 
     float4 p = ro + hitDistance[ray] * rd;
-    printf("TriangleMesh face %d: ray=%d; hm=%d; hd=%f; hn=(%f, %f, %f); p=(%f, %f, %f); ro=(%f, %f, %f); rd=(%f, %f, %f)\n",
-           elementIndex, ray, hitMap[ray], hitDistance[ray], hitNormals[ray].x, hitNormals[ray].y, hitNormals[ray].z, 
+    printf("TriangleMesh face %d [%d,%d,%d]: ray=%d; hm=%d; hd=%f; hn=(%f, %f, %f); p=(%f, %f, %f); ro=(%f, %f, %f); rd=(%f, %f, %f)\n",
+           elementIndex, v0Index, v1Index, v2Index, ray, hitMap[ray], hitDistance[ray], hitNormals[ray].x, hitNormals[ray].y, hitNormals[ray].z, 
            p.x, p.y, p.z, ro.x, ro.y, ro.z, rd.x, rd.y, rd.z);
   }
 #endif

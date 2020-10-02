@@ -1,5 +1,5 @@
 #define BIAS 0.001f
-// #define DEBUG_RAY 782682
+// #define DEBUG_RAY 905232
 
 __kernel void shading(__global float4 *rayOrigins,
                       __global float4 *rayDirections,
@@ -63,7 +63,7 @@ __kernel void shading(__global float4 *rayOrigins,
       float4 ld = normalize(lightDirection[i]);
       float b = acos(dot(-l, ld));
       // float kAtt = (b > angle/2 ? 0 : pow(cospi(b/angle), 1.0f));
-      float kAtt = (b <= angle/2) * pow(cospi(b/angle), 1.0f);
+      float kAtt = (b <= angle/2) * pow(cospi(b/angle), 0.2f);
       intensity = intensity * kAtt;
 
 #ifdef DEBUG_RAY
@@ -110,7 +110,7 @@ __kernel void shading(__global float4 *rayOrigins,
     ray, hitElementId, ro.x, ro.y, ro.x, rd.x, rd.y, rd.z, rro.x, rro.y, rro.z, rrd.x, rrd.y, rrd.z,
     cc.x, cc.y, cc.z, colors[ray].x, colors[ray].y, colors[ray].z);
   
-    printf("  kd=(%f, %f, %f); ks=(%f, %f, %f); kr=(%f, %f, %f); ph=%f\n", elKd.x, elKd.y, elKd.z, elKs.x, elKs.y, elKs.z, elKr.x, elKr.y, elKr.z, elPh);
+    printf("  kd=(%f, %f, %f); ks=(%f, %f, %f); kr=(%f, %f, %f); ph=%f; krPrev=(%f, %f, %f)\n", elKd.x, elKd.y, elKd.z, elKs.x, elKs.y, elKs.z, elKr.x, elKr.y, elKr.z, elPh, krPrevRay.x, krPrevRay.y, krPrevRay.z);
   }
 #endif
 }

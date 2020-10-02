@@ -62,4 +62,8 @@ public class OpenCLUtils {
                 CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
                 Sizeof.cl_float * hostBuffer.length, Pointer.to(hostBuffer), null);
     }
+
+    public static String defineOption(String name, String value){
+        return String.format("-D %s=%s", name, value);
+    }
 }
