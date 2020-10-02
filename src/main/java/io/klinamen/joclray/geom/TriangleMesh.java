@@ -1,7 +1,7 @@
 package io.klinamen.joclray.geom;
 
-import io.klinamen.joclray.geom.bvh.Face;
-import io.klinamen.joclray.geom.bvh.FaceSet;
+import io.klinamen.joclray.octree.Face;
+import io.klinamen.joclray.octree.FaceSet;
 import io.klinamen.joclray.transformations.Transformation;
 import io.klinamen.joclray.util.FloatVec4;
 

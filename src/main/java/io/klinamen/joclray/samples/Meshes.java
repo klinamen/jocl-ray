@@ -22,14 +22,6 @@ public class Meshes {
         return load("/meshes/bunny-low.obj");
     }
 
-    public static TriangleMesh topHat() {
-        return load("/meshes/tophat.obj");
-    }
-
-    public static TriangleMesh plant() {
-        return load("/meshes/plant.obj");
-    }
-
     public static TriangleMesh bunny() {
         return load("/meshes/bunny.obj");
     }
