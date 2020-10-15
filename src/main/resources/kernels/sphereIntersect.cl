@@ -1,3 +1,5 @@
+#define DEBUG_RAY 1924795
+
 __kernel void sphereIntersect(__global float4 *rayOrigins,
                               __global float4 *rayDirections,
                               __global float4 *hitNormals,
@@ -42,10 +44,12 @@ __kernel void sphereIntersect(__global float4 *rayOrigins,
     }
   }
 
-  // if (ray == 1072389) {
-  //   float4 p = ro + hitDistance[ray] * rd;
-  //   printf("Sphere %d: ray=%d; hm=%d; hd=%f; hn=(%f, %f, %f); p=(%f, %f, %f); ro=(%f, %f, %f); rd=(%f, %f, %f)\n",
-  //          elementIndex, ray, hitMap[ray], hitDistance[ray], hitNormals[ray].x, hitNormals[ray].y, hitNormals[ray].z, 
-  //          p.x, p.y, p.z, ro.x, ro.y, ro.z, rd.x, rd.y, rd.z);
-  // }
+#ifdef DEBUG_RAY
+  if (ray == DEBUG_RAY) {
+    float4 p = ro + hitDistance[ray] * rd;
+    printf("sphereIntersect: ray=%d, i=%d, id=%d, hm=%d; hd=%f; hn=(%f, %f, %f); p=(%f, %f, %f); ro=(%f, %f, %f); rd=(%f, %f, %f)\n",
+           ray, elementIndex, elementIds[elementIndex], hitMap[ray], hitDistance[ray], hitNormals[ray].x, hitNormals[ray].y, hitNormals[ray].z, 
+           p.x, p.y, p.z, ro.x, ro.y, ro.z, rd.x, rd.y, rd.z);
+  }
+#endif
 }

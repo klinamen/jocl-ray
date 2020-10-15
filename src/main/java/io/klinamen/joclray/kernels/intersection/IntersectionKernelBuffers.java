@@ -1,5 +1,6 @@
 package io.klinamen.joclray.kernels.intersection;
 
+import io.klinamen.joclray.util.FloatVec4;
 import io.klinamen.joclray.util.OpenCLUtils;
 import org.jocl.*;
 
@@ -32,6 +33,14 @@ public class IntersectionKernelBuffers implements AutoCloseable {
         cl_mem hitNormals = OpenCLUtils.allocateReadWriteMem(context, result.getHitNormals());
         cl_mem hitDistances = OpenCLUtils.allocateReadWriteMem(context, result.getHitDistances());
         cl_mem hitMap = OpenCLUtils.allocateReadWriteMem(context, result.getHitMap());
+
+        return new IntersectionKernelBuffers(hitNormals, hitDistances, hitMap);
+    }
+
+    public static IntersectionKernelBuffers empty(cl_context context, int rays){
+        cl_mem hitNormals = OpenCLUtils.allocateReadWriteMem(context, rays * FloatVec4.DIM, 0f);
+        cl_mem hitDistances = OpenCLUtils.allocateReadWriteMem(context, rays * FloatVec4.DIM, 0f);
+        cl_mem hitMap = OpenCLUtils.allocateReadWriteMem(context, rays, -1);
 
         return new IntersectionKernelBuffers(hitNormals, hitDistances, hitMap);
     }

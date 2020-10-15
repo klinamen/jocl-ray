@@ -1,5 +1,5 @@
 #define EPSILON 0.001f
-// #define DEBUG_RAY 1539024
+#define DEBUG_RAY 1924795
 
 __kernel void planeIntersect(__global float4 *rayOrigins,
                               __global float4 *rayDirections,
@@ -39,8 +39,8 @@ __kernel void planeIntersect(__global float4 *rayOrigins,
 #ifdef DEBUG_RAY
   if (ray == DEBUG_RAY) {
     float4 p = ro + hitDistances[ray] * rd;
-    printf("Plane %d: ray=%d; hm=%d; hd=%f; hn=(%f, %f, %f); p=(%f, %f, %f); ro=(%f, %f, %f); rd=(%f, %f, %f)\n",
-           elementIndex, ray, hitMap[ray], hitDistances[ray], hitNormals[ray].x, hitNormals[ray].y, hitNormals[ray].z, 
+    printf("planeIntersect: ray=%d, i=%d, id=%d, hm=%d; hd=%f; hn=(%f, %f, %f); p=(%f, %f, %f); ro=(%f, %f, %f); rd=(%f, %f, %f)\n",
+           ray, elementIndex, elementIds[elementIndex], hitMap[ray], hitDistances[ray], hitNormals[ray].x, hitNormals[ray].y, hitNormals[ray].z, 
            p.x, p.y, p.z, ro.x, ro.y, ro.z, rd.x, rd.y, rd.z);
   }
 #endif

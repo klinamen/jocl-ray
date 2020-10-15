@@ -1,4 +1,4 @@
-package io.klinamen.joclray.kernels.shading;
+package io.klinamen.joclray.kernels.shading.old;
 
 import io.klinamen.joclray.kernels.RaysBuffers;
 import io.klinamen.joclray.kernels.intersection.IntersectionKernelBuffers;

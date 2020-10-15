@@ -7,6 +7,7 @@ public abstract class Surface {
     private FloatVec4 ks = new FloatVec4();
     private FloatVec4 kr = new FloatVec4();
     private float phongExp;
+    private float ior;
 
     public FloatVec4 getKd() {
         return kd;
@@ -41,6 +42,15 @@ public abstract class Surface {
 
     public Surface setPhongExp(float phongExp) {
         this.phongExp = phongExp;
+        return this;
+    }
+
+    public float getIor() {
+        return ior;
+    }
+
+    public Surface setIor(float ior) {
+        this.ior = ior;
         return this;
     }
 }

@@ -1,22 +1,25 @@
 package io.klinamen.joclray.kernels;
 
+import io.klinamen.joclray.BaseKernelBuffers;
+import io.klinamen.joclray.util.FloatVec4;
 import io.klinamen.joclray.util.OpenCLUtils;
 import org.jocl.*;
 
 import java.nio.FloatBuffer;
 
-import static org.jocl.CL.*;
+import static org.jocl.CL.CL_TRUE;
+import static org.jocl.CL.clEnqueueReadBuffer;
 
-public class RaysBuffers implements AutoCloseable {
+public class RaysBuffers extends BaseKernelBuffers {
     private final cl_mem rayOrigins;
     private final cl_mem rayDirections;
 
     private final int rays;
 
-    private RaysBuffers(int rays, cl_mem rayOrigins, cl_mem rayDirections) {
+    protected RaysBuffers(int rays, cl_mem rayOrigins, cl_mem rayDirections) {
         this.rays = rays;
-        this.rayOrigins = rayOrigins;
-        this.rayDirections = rayDirections;
+        this.rayOrigins = track(rayOrigins);
+        this.rayDirections = track(rayDirections);
     }
 
     public cl_mem getRayOrigins() {
@@ -46,6 +49,12 @@ public class RaysBuffers implements AutoCloseable {
         return new RaysBuffers(result.getRays(), rayOrigins, rayDirections);
     }
 
+    public static RaysBuffers empty(cl_context context, int rays) {
+        cl_mem rayOrigins = OpenCLUtils.allocateReadWriteMem(context, new float[rays * FloatVec4.DIM]);
+        cl_mem rayDirections = OpenCLUtils.allocateReadWriteMem(context, new float[rays * FloatVec4.DIM]);
+        return new RaysBuffers(rays, rayOrigins, rayDirections);
+    }
+
     public static RaysBuffers create(cl_context context, FloatBuffer rayOriginsBuffer, FloatBuffer rayDirectionsBuffer) {
         if ((rayOriginsBuffer.limit() - rayOriginsBuffer.position()) != (rayDirectionsBuffer.limit() - rayDirectionsBuffer.position())) {
             throw new IllegalArgumentException("Buffers differ in size.");
@@ -55,11 +64,5 @@ public class RaysBuffers implements AutoCloseable {
         cl_mem rayDirections = OpenCLUtils.allocateReadOnlyMem(context, rayDirectionsBuffer);
 
         return new RaysBuffers(rayOriginsBuffer.limit(), rayOrigins, rayDirections);
-    }
-
-    @Override
-    public void close() {
-        clReleaseMemObject(rayOrigins);
-        clReleaseMemObject(rayDirections);
     }
 }

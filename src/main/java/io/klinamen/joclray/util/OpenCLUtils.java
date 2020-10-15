@@ -5,6 +5,7 @@ import org.jocl.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.FloatBuffer;
+import java.util.Arrays;
 import java.util.Scanner;
 
 import static org.jocl.CL.*;
@@ -43,6 +44,18 @@ public class OpenCLUtils {
         return clCreateBuffer(context,
                 CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
                 Sizeof.cl_float * hostBuffer.length, Pointer.to(hostBuffer), null);
+    }
+
+    public static cl_mem allocateReadWriteMem(cl_context context, int size, float value) {
+        float[] weights = new float[size];
+        Arrays.fill(weights, value);
+        return OpenCLUtils.allocateReadWriteMem(context, weights);
+    }
+
+    public static cl_mem allocateReadWriteMem(cl_context context, int size, int value) {
+        int[] values = new int[size];
+        Arrays.fill(values, value);
+        return OpenCLUtils.allocateReadWriteMem(context, values);
     }
 
     public static cl_mem allocateReadOnlyMem(cl_context context, FloatBuffer hostBuffer) {

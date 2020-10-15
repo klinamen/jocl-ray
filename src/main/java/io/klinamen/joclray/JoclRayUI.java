@@ -1,9 +1,9 @@
 package io.klinamen.joclray;
 
-import io.klinamen.joclray.rendering.FullRenderer;
 import io.klinamen.joclray.rendering.Renderer;
+import io.klinamen.joclray.rendering.TransmissionRenderer;
 import io.klinamen.joclray.rendering.VisibilityRenderer;
-import io.klinamen.joclray.samples.Scene3;
+import io.klinamen.joclray.samples.Scene4;
 import io.klinamen.joclray.scene.Scene;
 import picocli.CommandLine;
 
@@ -164,7 +164,8 @@ public class JoclRayUI implements Runnable {
     private Scene buildScene() {
 //        Scene scene = Scene1.build();
 //        Scene scene = Scene2.build();
-        Scene scene = Scene3.build();
+//        Scene scene = Scene3.build();
+        Scene scene = Scene4.build();
 
         scene.getCamera()
                 .setFrameWidth(image.getWidth())
@@ -178,7 +179,7 @@ public class JoclRayUI implements Runnable {
             case Visibility:
                 return new VisibilityRenderer(platformIndex, deviceIndex);
             case Shading:
-                return new FullRenderer(platformIndex, deviceIndex);
+                return new TransmissionRenderer(platformIndex, deviceIndex);
         }
 
         throw new UnsupportedOperationException("Unsupported renderer type: " + rendererType);
