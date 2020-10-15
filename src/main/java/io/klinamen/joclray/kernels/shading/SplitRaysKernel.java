@@ -53,7 +53,6 @@ public class SplitRaysKernel extends AbstractOpenCLKernel<SplitRaysKernelParams>
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getRaysBuffer().getRaysBuffers().getRayOrigins()));
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getRaysBuffer().getRaysBuffers().getRayDirections()));
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getRaysBuffer().getRayWeights()));
-        clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getRaysBuffer().getRayMediumIoR()));
 
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getIntersectionBuffers().getHitNormals()));
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getIntersectionBuffers().getHitDistances()));
@@ -65,12 +64,10 @@ public class SplitRaysKernel extends AbstractOpenCLKernel<SplitRaysKernelParams>
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getReflectedRaysBuffer().getRaysBuffers().getRayOrigins()));
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getReflectedRaysBuffer().getRaysBuffers().getRayDirections()));
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getReflectedRaysBuffer().getRayWeights()));
-        clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getReflectedRaysBuffer().getRayMediumIoR()));
 
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getTransmittedRaysBuffer().getRaysBuffers().getRayOrigins()));
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getTransmittedRaysBuffer().getRaysBuffers().getRayDirections()));
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getTransmittedRaysBuffer().getRayWeights()));
-        clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getTransmittedRaysBuffer().getRayMediumIoR()));
 
         return kernel;
     }

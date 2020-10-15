@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableSortedMap;
 import io.klinamen.joclray.geom.Surface;
 import io.klinamen.joclray.light.PointLight;
 import io.klinamen.joclray.util.FloatVec4;
+import io.klinamen.joclray.util.IoR;
 
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -14,6 +15,8 @@ public class Scene {
 
     private float ambientLightIntensity = 0;
     private FloatVec4 origin = new FloatVec4();
+
+    private float worldIor = IoR.VACUUM;
 
     int nextId = 0;
     private final SortedMap<Integer, Element> elements = new TreeMap<>(Integer::compare);
@@ -88,6 +91,15 @@ public class Scene {
 
     public Scene setAmbientLightIntensity(float ambientLightIntensity) {
         this.ambientLightIntensity = ambientLightIntensity;
+        return this;
+    }
+
+    public float getWorldIor() {
+        return worldIor;
+    }
+
+    public Scene setWorldIor(float worldIor) {
+        this.worldIor = worldIor;
         return this;
     }
 }

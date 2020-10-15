@@ -1,55 +1,66 @@
+#define WORLD_IOR 1.0f
 #define BIAS 0.001f
-#define DEBUG_RAY 1924795
+#define DEBUG_RAY 982134
 
-inline float cos_phi(float n1, float n2, float4 normal, float4 rd)
-{
-  float cos_phi = -dot(normal, rd);
-  if (n1 > n2)
-  {
-      float n = n1/n2;
-      float sinT2 = n*n*(1.0f - cos_phi * cos_phi);
-      if (sinT2 > 1.0f) {
-          // Total internal reflection
-          return 1.0f;
-      }
-      cos_phi = sqrt(1.0-sinT2);
-  }
 
-  return cos_phi;
-}
+inline float fresnel(float ni, float nt, float4 rd, float4 hn) 
+{ 
+    float cosi = dot(rd, hn);
+    if (cosi > 0) {
+      float tmp = nt;
+      nt = ni;
+      ni = tmp;
+    }
 
-/**
-  Implementation from https://blog.demofox.org/2017/01/09/raytracing-reflection-refraction-fresnel-total-internal-reflection-and-beers-law/
- */
-inline float4 fresnel(float n1, float n2, float cos_phi, float4 mat_kr)
-{
-  // Schlick aproximation
-  float r0 = (n1 - n2) / (n1 + n2);
-  r0 *= r0;
-
-  float x = 1.0f - fabs(cos_phi);
-  float r = r0 + (1.0f - r0) * x * x * x * x * x;
+    // Compute sint using Snell's law
+    float sint = ni / nt * sqrt(max(0.f, 1 - cosi * cosi));
+    if (sint >= 1.0f) { 
+      // Total internal reflection
+      return 1.0f;
+    }
+    
+    float cost = sqrt(max(0.f, 1.0f - sint * sint)); 
+    cosi = fabs(cosi); 
+    float Rs = ((nt * cosi) - (ni * cost)) / ((nt * cosi) + (ni * cost)); 
+    float Rp = ((ni * cosi) - (nt * cost)) / ((ni * cosi) + (nt * cost)); 
+    float r = (Rs * Rs + Rp * Rp) / 2;
 
 #ifdef DEBUG_RAY
   int ray = get_global_id(0);
   if(ray == DEBUG_RAY){
-    printf("split_rays.fresnel: ray=%d, n1=%f, n2=%f, cos_phi=%f, r=%f\n", ray, n1, n2, cos_phi, r);
+    printf("split_rays.fresnel: ray=%d, cosi=%f, ni=%f, nt=%f, r=%f\n", ray, dot(rd, hn), ni, nt, r);
   }
 #endif
 
- // adjust reflect multiplier for object reflectivity
-  return mat_kr + (1.0f - mat_kr) * r;
+  return r;
 }
+
+inline float4 refract(float ni, float nt, float4 rd, float4 hn) 
+{ 
+    float cosi = dot(rd, hn); 
+    float4 norm = hn; 
+    if (cosi < 0) { 
+      cosi = -cosi; 
+    } else { 
+      float tmp = nt;
+      nt = ni;
+      ni = tmp;
+      norm = -norm; 
+    } 
+
+    float n = ni / nt; 
+    float k = 1 - n * n * (1 - cosi * cosi); 
+    return k < 0 ? 0 : n * rd + (n * cosi - sqrt(k)) * norm;
+} 
 
 __kernel void split_rays(
               __global const float4 *ray_origins,
               __global const float4 *ray_dirs,
               __global const float4 *ray_weights, // weight of the incident rays
-              __global const float *ray_n,        // IoR of the material the incident ray is traveling through
               
               __global const float4 *hit_normals,
               __global const float *hit_distances,
-              __global int *hit_map,
+              __global const int *hit_map,
               
               __global const float4 *mat_kr,   // material reflectivity (indexed by element id)
               __global const float *mat_n,     // material index of refraction (indexed by element id)
@@ -57,12 +68,10 @@ __kernel void split_rays(
               __global float4 *r_ray_origins,  // origins of the reflected rays
               __global float4 *r_ray_dirs,     // directions of the reflected rays
               __global float4 *r_ray_weights,  // weights of the reflected rays
-              __global float *r_ray_n,         // IoR of the material the reflected ray is traveling through (TODO remove)
               
               __global float4 *t_ray_origins,  // origins of the transmitted rays
               __global float4 *t_ray_dirs,     // directions of the transmitted rays
-              __global float4 *t_ray_weights,  // weights of the transmitted rays
-              __global float *t_ray_n          // IoR of the material the transmitted ray is traveling through
+              __global float4 *t_ray_weights   // weights of the transmitted rays
               ) {
   int ray = get_global_id(0);
 
@@ -85,7 +94,6 @@ __kernel void split_rays(
   // incident ray properties
   float4 ro = ray_origins[ray];
   float4 rd = ray_dirs[ray];
-  float rn = ray_n[ray];
   float4 rw = ray_weights[ray];
 
   // hit info
@@ -97,40 +105,54 @@ __kernel void split_rays(
   float4 hit_kr = mat_kr[hit_id];
   float hit_n = mat_n[hit_id];
 
-  float cp = cos_phi(rn, hit_n, hn, rd);
+  float cosi = dot(rd, hn);
+  float4 bias = BIAS * hn;
 
-  float4 r_weight = fresnel(rn, hit_n, cp, hit_kr);
-  float4 t_weight = 1.0f - r_weight;
+  float4 tro = 0.f;
+  float4 trd = 0.f;
 
-  float4 bias = cp > 0 ? BIAS * hn : -BIAS * hn;
+  float4 r_weight = hit_kr;
+  float4 t_weight = 0.f;
+
+  if(hit_n > 0){
+    // hit object is refractive
+    r_weight = hit_kr + (1.0f - hit_kr) * fresnel(WORLD_IOR, hit_n, rd, hn);
+    t_weight = 1.0f - r_weight;
+    
+    if(cosi > 0){
+      // invert bias if inside the object
+      bias = -bias;
+    }
+
+    // transmission ray
+    tro = hp - bias;  // bias to avoid self-intersections
+    trd = refract(WORLD_IOR, hit_n, rd, hn);
+  }
+
+  // float4 r_weight = hit_kr + (1.0f - hit_kr) * fresnel(rn, hit_n, rd, hn);
+  // float4 t_weight = 1.0f - r_weight;
+
+  // float cosi = dot(rd, hn);
+  // float4 bias = cosi > 0 ? -BIAS * hn : BIAS * hn;
   
   // reflection ray
-  float4 rro = hp + bias;  // bias outwards to avoid self-intersections
-  float4 rrd = normalize(rd - 2 * dot(rd, hn) * hn);
+  float4 rro = hp + bias;  // bias to avoid self-intersections
+  float4 rrd = normalize(rd - 2 * cosi * hn);
   
-  // transmission ray
-  float4 tro = hp - bias;  // bias inwards to avoid self-intersections
-  float4 trd = normalize((rn/hit_n) * (rd - hn * cp) - hn * cp);
-
   r_ray_origins[ray] = rro;
   r_ray_dirs[ray] = rrd;
   r_ray_weights[ray] = rw * r_weight;
-  r_ray_n[ray] = rn;
 
   t_ray_origins[ray] = tro;
   t_ray_dirs[ray] = trd;
   t_ray_weights[ray] = rw * t_weight;
-  t_ray_n[ray] = hit_n;
-
-  // reset hitMap
-  // hit_map[ray] = -1;
 
 #ifdef DEBUG_RAY
   if(ray == DEBUG_RAY){
     printf("split_rays: ray=%d, hm=%d, ro=(%f, %f, %f), rd=(%f, %f, %f), rro=(%f, %f, %f), rrd=(%f, %f, %f), rrw=(%f, %f, %f), rrn=%f, tro=(%f, %f, %f), trd=(%f, %f, %f), trw=(%f, %f, %f), trn=%f\n", 
     ray, hit_id, ro.x, ro.y, ro.x, rd.x, rd.y, rd.z,
     rro.x, rro.y, rro.z, rrd.x, rrd.y, rrd.z, r_weight.x, r_weight.y, r_weight.z,
-    rn, tro.x, tro.y, tro.z, trd.x, trd.y, trd.z, t_weight.x, t_weight.y, t_weight.z,
+    WORLD_IOR, tro.x, tro.y, tro.z, trd.x, trd.y, trd.z, t_weight.x, t_weight.y, t_weight.z,
     hit_n);
   }
 #endif

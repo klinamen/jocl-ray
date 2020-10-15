@@ -1,4 +1,4 @@
-#define DEBUG_RAY 1924795
+// #define DEBUG_RAY 847750
 // #define DEBUG_LIGHTS
 
 __kernel void dl_blinn_phong(

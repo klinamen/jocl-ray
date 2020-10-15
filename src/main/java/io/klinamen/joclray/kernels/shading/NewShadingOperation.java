@@ -16,25 +16,21 @@ import java.util.Queue;
 import static org.jocl.CL.clFinish;
 
 public class NewShadingOperation implements OpenCLKernel<NewShadingOperationParams> {
-    //    public static final float AIR_IOR = 1.000273f;
-    public static final float WORLD_IOR = 1.0f;
-
     private final cl_context context;
     private final IntersectionOperation intersection;
     private final SplitRaysKernel splitRays;
     private final BlinnPhongKernel shading;
 
-    private final int bounces;
+    private final int maxGeneration;
 
     private NewShadingOperationParams params;
 
-    public NewShadingOperation(cl_context context, IntersectionOperation intersection, SplitRaysKernel splitRays, BlinnPhongKernel shading, int bounces) {
+    public NewShadingOperation(cl_context context, IntersectionOperation intersection, SplitRaysKernel splitRays, BlinnPhongKernel shading, int maxGeneration) {
         this.context = context;
         this.intersection = intersection;
         this.splitRays = splitRays;
         this.shading = shading;
-
-        this.bounces = bounces;
+        this.maxGeneration = maxGeneration;
     }
 
     private static class RayGeneration implements AutoCloseable {
@@ -74,7 +70,7 @@ public class NewShadingOperation implements OpenCLKernel<NewShadingOperationPara
             int iRay = 0;
 
             Queue<RayGeneration> qShading = new LinkedList<>();
-            qShading.add(new RayGeneration(WeightedRaysBuffer.from(context, params.getViewRaysBuffer(), WORLD_IOR), 0, "p" + iRay++));
+            qShading.add(new RayGeneration(WeightedRaysBuffer.from(context, params.getViewRaysBuffer(), params.getScene().getWorldIor()), 0, "p" + iRay++));
 
             IntersectionKernelBuffers ib = params.getIntersectionBuffers();
 
@@ -82,7 +78,7 @@ public class NewShadingOperation implements OpenCLKernel<NewShadingOperationPara
                 try (RayGeneration rayGen = qShading.poll()) {
                     WeightedRaysBuffer raysBuffer = rayGen.getBuffer();
 
-                    System.out.printf("*** Processing (%s), gen %d/%d ***" + System.lineSeparator(), rayGen.getName(), rayGen.getGeneration(), bounces);
+                    System.out.printf("*** Processing (%s), gen %d/%d ***" + System.lineSeparator(), rayGen.getName(), rayGen.getGeneration(), maxGeneration);
 
                     if (rayGen.getGeneration() > 0) {
                         if(ib != params.getIntersectionBuffers()){
@@ -105,7 +101,7 @@ public class NewShadingOperation implements OpenCLKernel<NewShadingOperationPara
                     );
                     shading.enqueue(queue);
 
-                    if (rayGen.getGeneration() < bounces) {
+                    if (rayGen.getGeneration() < maxGeneration) {
                         WeightedRaysBuffer reflectedRaysBuffer = WeightedRaysBuffer.empty(context, raysBuffer.getRaysBuffers().getRays());
                         WeightedRaysBuffer transmittedRaysBuffer = WeightedRaysBuffer.empty(context, raysBuffer.getRaysBuffers().getRays());
                         splitRays.setParams(new SplitRaysKernelParams(raysBuffer, ib, transmissionPropsBuffers, reflectedRaysBuffer, transmittedRaysBuffer));

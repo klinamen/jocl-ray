@@ -1,5 +1,5 @@
 #define EPSILON 0.001f
-#define DEBUG_RAY 1924795
+// #define DEBUG_RAY 847750
 
 __kernel void planeIntersect(__global float4 *rayOrigins,
                               __global float4 *rayDirections,

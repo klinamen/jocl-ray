@@ -11,22 +11,16 @@ public class WeightedRaysBuffer extends BaseKernelBuffers {
     private static final float DEFAULT_RAY_WEIGHT = 1.0f;
 
     private final cl_mem rayWeights;
-    private final cl_mem rayMediumIoR;
 
     private final RaysBuffers raysBuffers;
 
-    private WeightedRaysBuffer(RaysBuffers raysBuffers, cl_mem rayWeights, cl_mem rayMediumIoR) {
+    private WeightedRaysBuffer(RaysBuffers raysBuffers, cl_mem rayWeights) {
         this.raysBuffers = raysBuffers;
         this.rayWeights = track(rayWeights);
-        this.rayMediumIoR = track(rayMediumIoR);
     }
 
     public cl_mem getRayWeights() {
         return rayWeights;
-    }
-
-    public cl_mem getRayMediumIoR() {
-        return rayMediumIoR;
     }
 
     public RaysBuffers getRaysBuffers() {
@@ -35,15 +29,13 @@ public class WeightedRaysBuffer extends BaseKernelBuffers {
 
     public static WeightedRaysBuffer from(cl_context context, RaysBuffers raysBuffers, float mediumIoR) {
         return new WeightedRaysBuffer(raysBuffers,
-                OpenCLUtils.allocateReadWriteMem(context, raysBuffers.getRays() * FloatVec4.DIM, DEFAULT_RAY_WEIGHT),
-                OpenCLUtils.allocateReadWriteMem(context, raysBuffers.getRays(), mediumIoR)
+                OpenCLUtils.allocateReadWriteMem(context, raysBuffers.getRays() * FloatVec4.DIM, DEFAULT_RAY_WEIGHT)
         );
     }
 
     public static WeightedRaysBuffer empty(cl_context context, int rays) {
         return new WeightedRaysBuffer(RaysBuffers.empty(context, rays),
-                OpenCLUtils.allocateReadWriteMem(context, new float[rays * FloatVec4.DIM]),
-                OpenCLUtils.allocateReadWriteMem(context, new float[rays])
+                OpenCLUtils.allocateReadWriteMem(context, new float[rays * FloatVec4.DIM])
         );
     }
 }
