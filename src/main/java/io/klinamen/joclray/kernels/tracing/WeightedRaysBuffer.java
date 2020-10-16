@@ -1,13 +1,13 @@
-package io.klinamen.joclray.kernels.shading;
+package io.klinamen.joclray.kernels.tracing;
 
-import io.klinamen.joclray.BaseKernelBuffers;
-import io.klinamen.joclray.kernels.RaysBuffers;
+import io.klinamen.joclray.kernels.casting.RaysBuffers;
 import io.klinamen.joclray.util.FloatVec4;
+import io.klinamen.joclray.util.KernelBuffersPool;
 import io.klinamen.joclray.util.OpenCLUtils;
 import org.jocl.cl_context;
 import org.jocl.cl_mem;
 
-public class WeightedRaysBuffer extends BaseKernelBuffers {
+public class WeightedRaysBuffer extends KernelBuffersPool {
     private static final float DEFAULT_RAY_WEIGHT = 1.0f;
 
     private final cl_mem rayWeights;

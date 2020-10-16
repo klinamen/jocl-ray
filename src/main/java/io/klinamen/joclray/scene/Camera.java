@@ -54,7 +54,15 @@ public class Camera {
     }
 
     public int getPixels() {
-        return (int)getFrameWidth() * (int) getFrameHeight();
+        return getImageWidth() * getImageHeight();
+    }
+
+    public int getImageWidth(){
+        return (int)getFrameWidth();
+    }
+
+    public int getImageHeight(){
+        return (int) getFrameHeight();
     }
 
     public FloatVec4 getTo() {

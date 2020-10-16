@@ -1,14 +1,23 @@
 package io.klinamen.joclray.rendering;
 
 import io.klinamen.joclray.display.ShadingDisplay;
-import io.klinamen.joclray.kernels.*;
+import io.klinamen.joclray.kernels.LightIntensityMapOperation;
+import io.klinamen.joclray.kernels.LightIntensityMapOperationParams;
+import io.klinamen.joclray.kernels.casting.RaysBuffers;
+import io.klinamen.joclray.kernels.casting.ShadowRaysKernel;
+import io.klinamen.joclray.kernels.casting.ViewRaysKernel;
+import io.klinamen.joclray.kernels.casting.ViewRaysKernelParams;
 import io.klinamen.joclray.kernels.intersection.IntersectionKernelBuffers;
 import io.klinamen.joclray.kernels.intersection.IntersectionOperation;
 import io.klinamen.joclray.kernels.intersection.IntersectionOperationParams;
 import io.klinamen.joclray.kernels.intersection.factory.IntersectionKernelFactory;
 import io.klinamen.joclray.kernels.intersection.factory.RegistryIntersectionKernelFactory;
-import io.klinamen.joclray.kernels.shading.*;
+import io.klinamen.joclray.kernels.shading.ImageBuffer;
+import io.klinamen.joclray.kernels.shading.SplitRaysKernel;
 import io.klinamen.joclray.kernels.shading.blinnphong.BlinnPhongKernel;
+import io.klinamen.joclray.kernels.tracing.LightingBuffers;
+import io.klinamen.joclray.kernels.tracing.TransmissionTracingOperation;
+import io.klinamen.joclray.kernels.tracing.TransmissionTracingOperationParams;
 import io.klinamen.joclray.scene.Scene;
 import io.klinamen.joclray.util.FloatVec4;
 
@@ -24,7 +33,7 @@ public class TransmissionRenderer extends OpenCLRenderer implements AutoCloseabl
 
     private final IntersectionOperation intersectionOp = new IntersectionOperation(intersectionKernelFactory);
     private final LightIntensityMapOperation lightIntensityMapOperation = new LightIntensityMapOperation(getContext(), shadowRaysKernel, intersectionOp);
-    private final NewShadingOperation shadingOperation = new NewShadingOperation(getContext(), intersectionOp, splitRaysKernel, shadingKernel, 3);
+    private final TransmissionTracingOperation shadingOperation = new TransmissionTracingOperation(getContext(), intersectionOp, splitRaysKernel, shadingKernel, 3);
 
     public TransmissionRenderer() {
 
@@ -37,7 +46,7 @@ public class TransmissionRenderer extends OpenCLRenderer implements AutoCloseabl
     @Override
     protected void doRender(Scene scene, BufferedImage outImage) {
         final int nPixels = scene.getCamera().getPixels();
-        float[] imageBuffer = new float[nPixels * FloatVec4.DIM];
+        float[] outImageBuf = new float[nPixels * FloatVec4.DIM];
 
         try(RaysBuffers viewRaysBuffers = RaysBuffers.empty(getContext(), nPixels)){
             // generate view rays
@@ -56,19 +65,19 @@ public class TransmissionRenderer extends OpenCLRenderer implements AutoCloseabl
 
                 float[] lightIntensityMap = lightIntensityMapOperationParams.getLightIntensityMap();
 
-                try(ImageBuffer ib = ImageBuffer.create(getContext(), imageBuffer);
+                try(ImageBuffer ib = ImageBuffer.create(getContext(), outImageBuf);
                     LightingBuffers lb = LightingBuffers.create(getContext(), scene, lightIntensityMap)
                 ){
-                    shadingOperation.setParams(new NewShadingOperationParams(viewRaysBuffers, viewRaysIntersectionsBuffers, lb, ib, scene));
+                    shadingOperation.setParams(new TransmissionTracingOperationParams(viewRaysBuffers, viewRaysIntersectionsBuffers, lb, ib, scene));
                     shadingOperation.enqueue(getQueue());
 
-                    ib.readTo(getQueue(), imageBuffer);
+                    ib.readTo(getQueue(), outImageBuf);
                 }
             }
         }
 
         // update image
-        new ShadingDisplay(scene, imageBuffer).update(outImage);
+        new ShadingDisplay(scene, outImageBuf).update(outImage);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package io.klinamen.joclray.kernels;
 
 import io.klinamen.joclray.geom.Surface;
+import io.klinamen.joclray.kernels.casting.RaysBuffers;
 import io.klinamen.joclray.kernels.intersection.IntersectionKernelBuffers;
 import io.klinamen.joclray.scene.ElementSet;
 import io.klinamen.joclray.scene.LightElement;

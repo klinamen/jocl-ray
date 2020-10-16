@@ -1,7 +1,7 @@
-package io.klinamen.joclray.kernels;
+package io.klinamen.joclray.kernels.casting;
 
-import io.klinamen.joclray.BaseKernelBuffers;
 import io.klinamen.joclray.util.FloatVec4;
+import io.klinamen.joclray.util.KernelBuffersPool;
 import io.klinamen.joclray.util.OpenCLUtils;
 import org.jocl.*;
 
@@ -10,7 +10,7 @@ import java.nio.FloatBuffer;
 import static org.jocl.CL.CL_TRUE;
 import static org.jocl.CL.clEnqueueReadBuffer;
 
-public class RaysBuffers extends BaseKernelBuffers {
+public class RaysBuffers extends KernelBuffersPool {
     private final cl_mem rayOrigins;
     private final cl_mem rayDirections;
 

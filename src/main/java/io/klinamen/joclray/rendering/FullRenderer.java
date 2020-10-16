@@ -1,7 +1,9 @@
 package io.klinamen.joclray.rendering;
 
 import io.klinamen.joclray.display.ShadingDisplay;
-import io.klinamen.joclray.kernels.*;
+import io.klinamen.joclray.kernels.LightIntensityMapOperation;
+import io.klinamen.joclray.kernels.LightIntensityMapOperationParams;
+import io.klinamen.joclray.kernels.casting.*;
 import io.klinamen.joclray.kernels.intersection.IntersectResult;
 import io.klinamen.joclray.kernels.intersection.IntersectionKernelBuffers;
 import io.klinamen.joclray.kernels.intersection.IntersectionOperation;

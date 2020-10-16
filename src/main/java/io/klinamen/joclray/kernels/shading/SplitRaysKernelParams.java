@@ -1,6 +1,8 @@
 package io.klinamen.joclray.kernels.shading;
 
 import io.klinamen.joclray.kernels.intersection.IntersectionKernelBuffers;
+import io.klinamen.joclray.kernels.tracing.TransmissionPropsBuffers;
+import io.klinamen.joclray.kernels.tracing.WeightedRaysBuffer;
 
 public class SplitRaysKernelParams {
     private final WeightedRaysBuffer raysBuffer;

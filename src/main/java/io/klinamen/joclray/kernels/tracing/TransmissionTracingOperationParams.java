@@ -1,10 +1,11 @@
-package io.klinamen.joclray.kernels.shading;
+package io.klinamen.joclray.kernels.tracing;
 
-import io.klinamen.joclray.kernels.RaysBuffers;
+import io.klinamen.joclray.kernels.casting.RaysBuffers;
 import io.klinamen.joclray.kernels.intersection.IntersectionKernelBuffers;
+import io.klinamen.joclray.kernels.shading.ImageBuffer;
 import io.klinamen.joclray.scene.Scene;
 
-public class NewShadingOperationParams {
+public class TransmissionTracingOperationParams {
     private final RaysBuffers viewRaysBuffer;
     private final IntersectionKernelBuffers intersectionBuffers;
     private final LightingBuffers lightingBuffers;
@@ -12,7 +13,7 @@ public class NewShadingOperationParams {
 
     private final Scene scene;
 
-    public NewShadingOperationParams(RaysBuffers viewRaysBuffer, IntersectionKernelBuffers intersectionBuffers, LightingBuffers lightingBuffers, ImageBuffer imageBuffer, Scene scene) {
+    public TransmissionTracingOperationParams(RaysBuffers viewRaysBuffer, IntersectionKernelBuffers intersectionBuffers, LightingBuffers lightingBuffers, ImageBuffer imageBuffer, Scene scene) {
         this.viewRaysBuffer = viewRaysBuffer;
         this.intersectionBuffers = intersectionBuffers;
         this.lightingBuffers = lightingBuffers;

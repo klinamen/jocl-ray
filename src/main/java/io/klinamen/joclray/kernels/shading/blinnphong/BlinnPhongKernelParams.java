@@ -2,8 +2,8 @@ package io.klinamen.joclray.kernels.shading.blinnphong;
 
 import io.klinamen.joclray.kernels.intersection.IntersectionKernelBuffers;
 import io.klinamen.joclray.kernels.shading.ImageBuffer;
-import io.klinamen.joclray.kernels.shading.LightingBuffers;
-import io.klinamen.joclray.kernels.shading.WeightedRaysBuffer;
+import io.klinamen.joclray.kernels.tracing.LightingBuffers;
+import io.klinamen.joclray.kernels.tracing.WeightedRaysBuffer;
 
 public class BlinnPhongKernelParams {
     private final float ambientLightIntensity;

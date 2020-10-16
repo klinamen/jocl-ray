@@ -1,5 +1,6 @@
 package io.klinamen.joclray.kernels;
 
+import io.klinamen.joclray.util.KernelBuffersPoolManager;
 import io.klinamen.joclray.util.OpenCLUtils;
 import org.jocl.*;
 
@@ -8,7 +9,7 @@ import java.util.List;
 
 import static org.jocl.CL.*;
 
-public abstract class AbstractOpenCLKernel<TParams> implements OpenCLKernel<TParams>, AutoCloseable {
+public abstract class AbstractOpenCLKernel<TParams> extends AbstractOpenCLOperation implements OpenCLKernel<TParams>, AutoCloseable {
     private final cl_context context;
 
     private cl_program program = null;
@@ -16,7 +17,8 @@ public abstract class AbstractOpenCLKernel<TParams> implements OpenCLKernel<TPar
 
     private TParams kernelParams;
 
-    private final List<cl_mem> buffers = new ArrayList<>();
+    private final KernelBuffersPoolManager buffersPoolManager = new KernelBuffersPoolManager(this.getClass().getSimpleName());
+
     private final List<String> compilerOptions = new ArrayList<>();
 
     public AbstractOpenCLKernel(cl_context context) {
@@ -28,19 +30,14 @@ public abstract class AbstractOpenCLKernel<TParams> implements OpenCLKernel<TPar
     }
 
     protected cl_mem track(cl_mem buffer){
-        buffers.add(buffer);
-        return buffer;
-    }
-
-    protected void releaseTrackedBuffers(){
-        buffers.forEach(CL::clReleaseMemObject);
-        buffers.clear();
+        return buffersPoolManager.track(buffer);
     }
 
     @Override
     public void setParams(TParams kernelParams) {
         this.kernelParams = kernelParams;
 
+        buffersPoolManager.close();
         if(kernel != null){
             clReleaseKernel(kernel);
             kernel = null;
@@ -105,7 +102,8 @@ public abstract class AbstractOpenCLKernel<TParams> implements OpenCLKernel<TPar
 
     protected abstract long[] getWorkgroupSize();
 
-    public void enqueue(cl_command_queue queue) {
+    @Override
+    public void doEnqueue(cl_command_queue queue) {
         // Set the work-item dimensions
         long[] global_work_size = getWorkgroupSize();
 
@@ -116,7 +114,7 @@ public abstract class AbstractOpenCLKernel<TParams> implements OpenCLKernel<TPar
 
     @Override
     public void close() {
-        releaseTrackedBuffers();
+        buffersPoolManager.close();
         releaseProgram();
     }
 }

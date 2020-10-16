@@ -1,15 +1,15 @@
-package io.klinamen.joclray.kernels.shading;
+package io.klinamen.joclray.kernels.tracing;
 
-import io.klinamen.joclray.BaseKernelBuffers;
 import io.klinamen.joclray.geom.Surface;
 import io.klinamen.joclray.scene.ElementSet;
 import io.klinamen.joclray.scene.Scene;
 import io.klinamen.joclray.scene.SurfaceElement;
+import io.klinamen.joclray.util.KernelBuffersPool;
 import io.klinamen.joclray.util.OpenCLUtils;
 import org.jocl.cl_context;
 import org.jocl.cl_mem;
 
-public class TransmissionPropsBuffers extends BaseKernelBuffers {
+public class TransmissionPropsBuffers extends KernelBuffersPool {
     private final cl_mem matKr;
     private final cl_mem matN;
 

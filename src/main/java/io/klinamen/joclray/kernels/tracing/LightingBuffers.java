@@ -1,17 +1,17 @@
-package io.klinamen.joclray.kernels.shading;
+package io.klinamen.joclray.kernels.tracing;
 
-import io.klinamen.joclray.BaseKernelBuffers;
 import io.klinamen.joclray.light.PointLight;
 import io.klinamen.joclray.light.SpotLight;
 import io.klinamen.joclray.scene.ElementSet;
 import io.klinamen.joclray.scene.LightElement;
 import io.klinamen.joclray.scene.Scene;
 import io.klinamen.joclray.util.FloatVec4;
+import io.klinamen.joclray.util.KernelBuffersPool;
 import io.klinamen.joclray.util.OpenCLUtils;
 import org.jocl.cl_context;
 import org.jocl.cl_mem;
 
-public class LightingBuffers extends BaseKernelBuffers {
+public class LightingBuffers extends KernelBuffersPool {
     private final cl_mem lightPos;
     private final cl_mem lightIntensity;
     private final cl_mem lightDirection;

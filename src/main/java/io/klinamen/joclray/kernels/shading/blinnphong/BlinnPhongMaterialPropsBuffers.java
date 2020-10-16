@@ -1,15 +1,15 @@
 package io.klinamen.joclray.kernels.shading.blinnphong;
 
-import io.klinamen.joclray.BaseKernelBuffers;
 import io.klinamen.joclray.geom.Surface;
 import io.klinamen.joclray.scene.ElementSet;
 import io.klinamen.joclray.scene.Scene;
 import io.klinamen.joclray.scene.SurfaceElement;
+import io.klinamen.joclray.util.KernelBuffersPool;
 import io.klinamen.joclray.util.OpenCLUtils;
 import org.jocl.cl_context;
 import org.jocl.cl_mem;
 
-public class BlinnPhongMaterialPropsBuffers extends BaseKernelBuffers {
+public class BlinnPhongMaterialPropsBuffers extends KernelBuffersPool {
     private final cl_mem kd;
     private final cl_mem ks;
     private final cl_mem phongExp;

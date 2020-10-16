@@ -1,6 +1,5 @@
 package io.klinamen.joclray.kernels.intersection.impl;
 
-import com.google.common.collect.Lists;
 import com.google.common.primitives.Ints;
 import io.klinamen.joclray.geom.TriangleMesh;
 import io.klinamen.joclray.kernels.intersection.AbstractIntersectionKernel;
@@ -25,7 +24,7 @@ public class TriangleMeshIntersectionKernel extends AbstractIntersectionKernel<T
     }
 
     @Override
-    protected List<cl_mem> setAdditionalKernelArgs(int i, cl_kernel kernel) {
+    protected void setAdditionalKernelArgs(int i, cl_kernel kernel) {
 //        __global const int *elementIds,
 //                __global const float4 *vertices,
 //                __global const int *faceIndices
@@ -57,12 +56,10 @@ public class TriangleMeshIntersectionKernel extends AbstractIntersectionKernel<T
         cl_mem faceIndices = OpenCLUtils.allocateReadOnlyMem(getContext(), Ints.toArray(mergedIndices));
         cl_mem vertexNormals = OpenCLUtils.allocateReadOnlyMem(getContext(), FloatVec4.flatten(mergedVertexNormals));
 
-        clSetKernelArg(kernel, i++, Sizeof.cl_mem, Pointer.to(idsMem));
-        clSetKernelArg(kernel, i++, Sizeof.cl_mem, Pointer.to(vertices));
-        clSetKernelArg(kernel, i++, Sizeof.cl_mem, Pointer.to(faceIndices));
-        clSetKernelArg(kernel, i++, Sizeof.cl_mem, Pointer.to(vertexNormals));
-
-        return Lists.newArrayList(idsMem, vertices, faceIndices, vertexNormals);
+        clSetKernelArg(kernel, i++, Sizeof.cl_mem, Pointer.to(track(idsMem)));
+        clSetKernelArg(kernel, i++, Sizeof.cl_mem, Pointer.to(track(vertices)));
+        clSetKernelArg(kernel, i++, Sizeof.cl_mem, Pointer.to(track(faceIndices)));
+        clSetKernelArg(kernel, i++, Sizeof.cl_mem, Pointer.to(track(vertexNormals)));
     }
 
     @Override

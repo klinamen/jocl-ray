@@ -1,10 +1,10 @@
 package io.klinamen.joclray.rendering;
 
 import io.klinamen.joclray.display.IntersectionsDisplay;
-import io.klinamen.joclray.kernels.RaysBuffers;
-import io.klinamen.joclray.kernels.RaysGenerationResult;
-import io.klinamen.joclray.kernels.ViewRaysKernel;
-import io.klinamen.joclray.kernels.ViewRaysKernelParams;
+import io.klinamen.joclray.kernels.casting.RaysBuffers;
+import io.klinamen.joclray.kernels.casting.RaysGenerationResult;
+import io.klinamen.joclray.kernels.casting.ViewRaysKernel;
+import io.klinamen.joclray.kernels.casting.ViewRaysKernelParams;
 import io.klinamen.joclray.kernels.intersection.IntersectResult;
 import io.klinamen.joclray.kernels.intersection.IntersectionKernelBuffers;
 import io.klinamen.joclray.kernels.intersection.IntersectionOperation;

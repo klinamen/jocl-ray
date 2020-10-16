@@ -1,7 +1,7 @@
 package io.klinamen.joclray;
 
+import io.klinamen.joclray.rendering.MultiPassTransmissionRenderer;
 import io.klinamen.joclray.rendering.Renderer;
-import io.klinamen.joclray.rendering.TransmissionRenderer;
 import io.klinamen.joclray.rendering.VisibilityRenderer;
 import io.klinamen.joclray.samples.Scene4;
 import io.klinamen.joclray.scene.Scene;
@@ -179,7 +179,8 @@ public class JoclRayUI implements Runnable {
             case Visibility:
                 return new VisibilityRenderer(platformIndex, deviceIndex);
             case Shading:
-                return new TransmissionRenderer(platformIndex, deviceIndex);
+//                return new TransmissionRenderer(platformIndex, deviceIndex);
+                return new MultiPassTransmissionRenderer(platformIndex, deviceIndex, 2);
         }
 
         throw new UnsupportedOperationException("Unsupported renderer type: " + rendererType);

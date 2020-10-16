@@ -1,4 +1,4 @@
-package io.klinamen.joclray.kernels;
+package io.klinamen.joclray.kernels.casting;
 
 import io.klinamen.joclray.scene.Scene;
 import io.klinamen.joclray.util.FloatVec4;
@@ -45,3 +45,4 @@ public class ViewRaysKernelParams {
         return buffers;
     }
 }
+

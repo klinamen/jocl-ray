@@ -1,4 +1,4 @@
-package io.klinamen.joclray.kernels;
+package io.klinamen.joclray.kernels.casting;
 
 import io.klinamen.joclray.kernels.intersection.IntersectionKernelBuffers;
 import io.klinamen.joclray.scene.ElementSet;

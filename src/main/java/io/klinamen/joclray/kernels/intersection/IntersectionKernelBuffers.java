@@ -1,20 +1,22 @@
 package io.klinamen.joclray.kernels.intersection;
 
 import io.klinamen.joclray.util.FloatVec4;
+import io.klinamen.joclray.util.KernelBuffersPool;
 import io.klinamen.joclray.util.OpenCLUtils;
 import org.jocl.*;
 
-import static org.jocl.CL.*;
+import static org.jocl.CL.CL_TRUE;
+import static org.jocl.CL.clEnqueueReadBuffer;
 
-public class IntersectionKernelBuffers implements AutoCloseable {
+public class IntersectionKernelBuffers extends KernelBuffersPool {
     private final cl_mem hitNormals;
     private final cl_mem hitDistances;
     private final cl_mem hitMap;
 
     private IntersectionKernelBuffers(cl_mem hitNormals, cl_mem hitDistances, cl_mem hitMap) {
-        this.hitNormals = hitNormals;
-        this.hitDistances = hitDistances;
-        this.hitMap = hitMap;
+        this.hitNormals = track(hitNormals);
+        this.hitDistances = track(hitDistances);
+        this.hitMap = track(hitMap);
     }
 
     public cl_mem getHitNormals() {
@@ -54,12 +56,5 @@ public class IntersectionKernelBuffers implements AutoCloseable {
 
         clEnqueueReadBuffer(queue, getHitMap(), CL_TRUE, 0,
                 result.getRays() * Sizeof.cl_int, Pointer.to(result.getHitMap()), 0, null, null);
-    }
-
-    @Override
-    public void close() {
-        clReleaseMemObject(hitMap);
-        clReleaseMemObject(hitDistances);
-        clReleaseMemObject(hitNormals);
     }
 }

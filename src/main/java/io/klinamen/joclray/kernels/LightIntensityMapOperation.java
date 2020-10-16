@@ -1,5 +1,9 @@
 package io.klinamen.joclray.kernels;
 
+import io.klinamen.joclray.kernels.casting.RaysBuffers;
+import io.klinamen.joclray.kernels.casting.RaysGenerationResult;
+import io.klinamen.joclray.kernels.casting.ShadowRaysKernel;
+import io.klinamen.joclray.kernels.casting.ShadowRaysKernelParams;
 import io.klinamen.joclray.kernels.intersection.IntersectResult;
 import io.klinamen.joclray.kernels.intersection.IntersectionKernelBuffers;
 import io.klinamen.joclray.kernels.intersection.IntersectionOperation;
@@ -9,7 +13,7 @@ import io.klinamen.joclray.util.FloatVec4;
 import org.jocl.cl_command_queue;
 import org.jocl.cl_context;
 
-public class LightIntensityMapOperation implements OpenCLKernel<LightIntensityMapOperationParams> {
+public class LightIntensityMapOperation extends AbstractOpenCLOperation implements OpenCLKernel<LightIntensityMapOperationParams> {
     private final cl_context context;
     private final ShadowRaysKernel shadowRaysKernel;
     private final IntersectionOperation intersectionOperation;
@@ -28,7 +32,7 @@ public class LightIntensityMapOperation implements OpenCLKernel<LightIntensityMa
     }
 
     @Override
-    public void enqueue(cl_command_queue queue) {
+    protected void doEnqueue(cl_command_queue queue) {
         final int rays = params.getViewRaysBuffer().getRays();
 
         RaysGenerationResult shadowRaysResult = new RaysGenerationResult(rays * params.getLights().size());

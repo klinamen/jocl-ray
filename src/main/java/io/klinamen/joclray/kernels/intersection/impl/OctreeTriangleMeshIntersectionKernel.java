@@ -11,7 +11,10 @@ import io.klinamen.joclray.octree.TreeUtils;
 import io.klinamen.joclray.scene.SurfaceElement;
 import io.klinamen.joclray.util.FloatVec4;
 import io.klinamen.joclray.util.OpenCLUtils;
-import org.jocl.*;
+import org.jocl.Pointer;
+import org.jocl.Sizeof;
+import org.jocl.cl_context;
+import org.jocl.cl_kernel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +43,7 @@ public class OctreeTriangleMeshIntersectionKernel extends AbstractIntersectionKe
     }
 
     @Override
-    protected List<cl_mem> setAdditionalKernelArgs(int a, cl_kernel kernel) {
+    protected void setAdditionalKernelArgs(int a, cl_kernel kernel) {
         // one item per tree node
         List<FloatVec4> bbMinVertices = new ArrayList<>();
         List<FloatVec4> bbMaxVertices = new ArrayList<>();
@@ -119,8 +122,6 @@ public class OctreeTriangleMeshIntersectionKernel extends AbstractIntersectionKe
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(track(OpenCLUtils.allocateReadOnlyMem(getContext(), FloatVec4.flatten(mergedVertices)))));
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(track(OpenCLUtils.allocateReadOnlyMem(getContext(), FloatVec4.flatten(mergedVertexNormals)))));
         clSetKernelArg(kernel, a++, Sizeof.cl_int, Pointer.to(new int[]{getParams().getSurfaces().size()}));
-
-        return List.of();
     }
 
     @Override

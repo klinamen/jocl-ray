@@ -1,6 +1,7 @@
 package io.klinamen.joclray.kernels.intersection;
 
 import io.klinamen.joclray.geom.Surface;
+import io.klinamen.joclray.kernels.AbstractOpenCLOperation;
 import io.klinamen.joclray.kernels.OpenCLKernel;
 import io.klinamen.joclray.kernels.intersection.factory.IntersectionKernelFactory;
 import io.klinamen.joclray.scene.ElementSet;
@@ -13,7 +14,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-public class IntersectionOperation implements OpenCLKernel<IntersectionOperationParams> {
+public class IntersectionOperation extends AbstractOpenCLOperation implements OpenCLKernel<IntersectionOperationParams> {
     private final IntersectionKernelFactory factory;
 
     private Map<Class<? extends Surface>, ElementSet<SurfaceElement<Surface>>> surfacesGroups;
@@ -63,7 +64,7 @@ public class IntersectionOperation implements OpenCLKernel<IntersectionOperation
     }
 
     @Override
-    public void enqueue(cl_command_queue queue) {
+    protected void doEnqueue(cl_command_queue queue) {
         if (params == null) {
             throw new RuntimeException("Operation params cannot be null.");
         }

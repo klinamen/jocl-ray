@@ -1,4 +1,4 @@
-package io.klinamen.joclray.kernels;
+package io.klinamen.joclray.kernels.casting;
 
 import io.klinamen.joclray.util.FloatVec4;
 

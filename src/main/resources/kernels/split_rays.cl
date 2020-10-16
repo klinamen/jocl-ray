@@ -1,6 +1,6 @@
 #define WORLD_IOR 1.0f
 #define BIAS 0.001f
-#define DEBUG_RAY 982134
+// #define DEBUG_RAY 982134
 
 
 inline float fresnel(float ni, float nt, float4 rd, float4 hn) 

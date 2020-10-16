@@ -1,14 +1,14 @@
-package io.klinamen.joclray.kernels;
+package io.klinamen.joclray.kernels.casting;
 
+import io.klinamen.joclray.kernels.AbstractOpenCLKernel;
 import io.klinamen.joclray.util.OpenCLUtils;
 import org.jocl.*;
 
-import static org.jocl.CL.*;
+import static org.jocl.CL.clCreateKernel;
+import static org.jocl.CL.clSetKernelArg;
 
 public class ShadowRaysKernel extends AbstractOpenCLKernel<ShadowRaysKernelParams> {
     public static final String KERNEL_NAME = "shadowRays";
-
-    private cl_mem lightPos;
 
     public ShadowRaysKernel(cl_context context) {
         super(context);
@@ -28,11 +28,7 @@ public class ShadowRaysKernel extends AbstractOpenCLKernel<ShadowRaysKernelParam
 //                __global int *hitMap, __global float4 *lightPos,
 //                __global float4 *shadowRayOrigin, __global float4 *shadowRayDir);
 
-        if(lightPos != null){
-            clReleaseMemObject(lightPos);
-        }
-
-        lightPos = OpenCLUtils.allocateReadOnlyMem(getContext(), getParams().getLights().getFloatVec4s(x -> x.getLight().getPosition()));
+        cl_mem lightPos = track(OpenCLUtils.allocateReadOnlyMem(getContext(), getParams().getLights().getFloatVec4s(x -> x.getLight().getPosition())));
 
         int a = 0;
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getViewRaysBuffers().getRayOrigins()));
@@ -50,15 +46,5 @@ public class ShadowRaysKernel extends AbstractOpenCLKernel<ShadowRaysKernelParam
     @Override
     protected long[] getWorkgroupSize() {
         return new long[]{ getParams().getViewRaysBuffers().getRays(), getParams().getLights().size() };
-    }
-
-    @Override
-    public void close() {
-        super.close();
-
-        if(lightPos != null) {
-            clReleaseMemObject(lightPos);
-            lightPos = null;
-        }
     }
 }
