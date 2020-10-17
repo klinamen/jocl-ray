@@ -15,7 +15,7 @@ import io.klinamen.joclray.kernels.intersection.IntersectionOperationParams;
 import io.klinamen.joclray.kernels.intersection.factory.IntersectionKernelFactory;
 import io.klinamen.joclray.kernels.intersection.factory.RegistryIntersectionKernelFactory;
 import io.klinamen.joclray.kernels.shading.ImageBuffer;
-import io.klinamen.joclray.kernels.shading.SplitRaysKernel;
+import io.klinamen.joclray.kernels.shading.SplitRaysDistKernel;
 import io.klinamen.joclray.kernels.shading.blinnphong.BlinnPhongKernel;
 import io.klinamen.joclray.kernels.tracing.LightingBuffers;
 import io.klinamen.joclray.kernels.tracing.TransmissionTracingOperation;
@@ -31,12 +31,17 @@ public class MultiPassTransmissionRenderer extends OpenCLRenderer implements Aut
     private final ViewRaysJitterKernel viewRaysKernel = new ViewRaysJitterKernel(getContext());
     private final ShadowRaysKernel shadowRaysKernel = new ShadowRaysKernel(getContext());
     private final BlinnPhongKernel shadingKernel = new BlinnPhongKernel(getContext());
-    private final SplitRaysKernel splitRaysKernel = new SplitRaysKernel(getContext());
     private final ImageMultiplyKernel imageMultiplyKernel = new ImageMultiplyKernel(getContext());
 
     private final IntersectionOperation intersectionOp = new IntersectionOperation(intersectionKernelFactory);
     private final LightIntensityMapOperation lightIntensityMapOperation = new LightIntensityMapOperation(getContext(), shadowRaysKernel, intersectionOp);
-    private final TransmissionTracingOperation shadingOperation = new TransmissionTracingOperation(getContext(), intersectionOp, splitRaysKernel, shadingKernel, 3);
+
+//    private final SplitRaysKernel splitRaysKernel = new SplitRaysKernel(getContext());
+
+    private final SplitRaysDistKernel splitRaysKernel = new SplitRaysDistKernel(getContext(), 1, 0.04f);
+    private final TransmissionTracingOperation tracingOperation = new TransmissionTracingOperation(getContext(), intersectionOp, splitRaysKernel, shadingKernel, 3);
+//    private final RecTransmissionTracingOperation tracingOperation = new RecTransmissionTracingOperation(getContext(), intersectionOp, splitRaysKernel, shadingKernel, 3);
+//    private final DistTransmissionTracingOperation tracingOperation = new DistTransmissionTracingOperation(getContext(), intersectionOp, splitRaysKernel, shadingKernel, 3);
 
     private final int samples;
 
@@ -53,7 +58,7 @@ public class MultiPassTransmissionRenderer extends OpenCLRenderer implements Aut
         try (ImageBuffer imageBuffer = ImageBuffer.create(getContext(), outImageBuf)) {
             for (int i = 0; i < samples; i++) {
                 for (int j = 0; j < samples; j++) {
-                    System.out.printf("Sample (%d/%d, %d/%d)" + System.lineSeparator(), i + 1, samples, j + 1, samples);
+                    System.out.printf("Image plane sample (%d/%d, %d/%d)" + System.lineSeparator(), i + 1, samples, j + 1, samples);
 
                     try (RaysBuffers viewRaysBuffers = RaysBuffers.empty(getContext(), scene.getCamera().getPixels())) {
                         // generate view rays
@@ -70,7 +75,7 @@ public class MultiPassTransmissionRenderer extends OpenCLRenderer implements Aut
             }
 
             // Average pixel values
-            imageMultiplyKernel.setParams(new ImageMultiplyKernelParams(1.0f / (float)(samples * samples), imageBuffer));
+            imageMultiplyKernel.setParams(new ImageMultiplyKernelParams(1.0f / (float) (samples * samples * splitRaysKernel.getSamples()), imageBuffer));
             imageMultiplyKernel.enqueue(getQueue());
 
             imageBuffer.readTo(getQueue(), outImageBuf);
@@ -94,8 +99,25 @@ public class MultiPassTransmissionRenderer extends OpenCLRenderer implements Aut
             float[] lightIntensityMap = lightIntensityMapOperationParams.getLightIntensityMap();
 
             try (LightingBuffers lb = LightingBuffers.create(getContext(), scene, lightIntensityMap)) {
-                shadingOperation.setParams(new TransmissionTracingOperationParams(viewRaysBuffers, viewRaysIntersectionsBuffers, lb, imageBuffer, scene));
-                shadingOperation.enqueue(getQueue());
+                for (int i = 0; i < splitRaysKernel.getSamples(); i++) {
+                    System.out.println(String.format("Reflection/Transmission sample %d/%d", i + 1, splitRaysKernel.getSamples()));
+
+//                    if(i > 0) {
+//                        // reset primary ray intersections
+//                        intersectionOp.setParams(new IntersectionOperationParams(scene.getSurfaces(), viewRaysBuffers, viewRaysIntersectionsBuffers));
+//                        intersectionOp.enqueue(getQueue());
+//                    }
+
+                    splitRaysKernel.seed();
+                    tracingOperation.setParams(new TransmissionTracingOperationParams(viewRaysBuffers, viewRaysIntersectionsBuffers, lb, imageBuffer, scene));
+                    tracingOperation.enqueue(getQueue());
+                }
+
+//                if (splitRaysKernel.getSamples() > 1) {
+//                    // Average pixel values
+//                    imageMultiplyKernel.setParams(new ImageMultiplyKernelParams(1.0f / (float) (splitRaysKernel.getSamples()), imageBuffer));
+//                    imageMultiplyKernel.enqueue(getQueue());
+//                }
             }
         }
     }

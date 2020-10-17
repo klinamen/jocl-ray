@@ -6,7 +6,6 @@ import org.jocl.Sizeof;
 import org.jocl.cl_context;
 import org.jocl.cl_kernel;
 
-import static org.jocl.CL.clCreateKernel;
 import static org.jocl.CL.clSetKernelArg;
 
 public class ViewRaysJitterKernel extends AbstractOpenCLKernel<ViewRaysJitterKernelParams> {
@@ -22,9 +21,7 @@ public class ViewRaysJitterKernel extends AbstractOpenCLKernel<ViewRaysJitterKer
     }
 
     @Override
-    protected cl_kernel buildKernel() {
-        cl_kernel kernel = clCreateKernel(getProgram(), getKernelName(), null);
-
+    protected void configureKernel(cl_kernel kernel) {
 //        __kernel void view_rays_jitter(const float2 frameSize, const float4 e, const float fov_rad,
 //                              const ulong seed,   // random seed
 //                              const int2 samples, // per-pixel samples
@@ -41,8 +38,6 @@ public class ViewRaysJitterKernel extends AbstractOpenCLKernel<ViewRaysJitterKer
         clSetKernelArg(kernel, a++, Sizeof.cl_int2, Pointer.to(new int[]{getParams().getxIndex(), getParams().getyIndex()}));
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getBuffers().getRayOrigins()));
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getBuffers().getRayDirections()));
-
-        return kernel;
     }
 
     @Override

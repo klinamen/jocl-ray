@@ -1,5 +1,6 @@
 package io.klinamen.joclray.kernels.shading;
 
+import io.klinamen.joclray.util.FloatVec4;
 import io.klinamen.joclray.util.KernelBuffersPool;
 import io.klinamen.joclray.util.OpenCLUtils;
 import org.jocl.*;
@@ -24,9 +25,13 @@ public class ImageBuffer extends KernelBuffersPool {
         return size;
     }
 
+    public int getPixels(){
+        return size / FloatVec4.DIM;
+    }
+
     public void readTo(cl_command_queue queue, float[] imageBuffer) {
         if(imageBuffer.length != size){
-            throw new IllegalArgumentException(String.format("Destination buffer size (%d) does nto match image buffer size (%d).", imageBuffer.length, size));
+            throw new IllegalArgumentException(String.format("Destination buffer size (%d) does not match image buffer size (%d).", imageBuffer.length, size));
         }
 
         clEnqueueReadBuffer(queue, image, CL_TRUE, 0,

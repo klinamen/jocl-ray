@@ -6,7 +6,6 @@ import org.jocl.Sizeof;
 import org.jocl.cl_context;
 import org.jocl.cl_kernel;
 
-import static org.jocl.CL.clCreateKernel;
 import static org.jocl.CL.clSetKernelArg;
 
 public class BlinnPhongKernel extends AbstractOpenCLKernel<BlinnPhongKernelParams> {
@@ -22,9 +21,7 @@ public class BlinnPhongKernel extends AbstractOpenCLKernel<BlinnPhongKernelParam
     }
 
     @Override
-    protected cl_kernel buildKernel() {
-        cl_kernel kernel = clCreateKernel(getProgram(), getKernelName(), null);
-
+    protected void configureKernel(cl_kernel kernel) {
 //        __kernel void dl_blinn_phong(
 //                __global const float4 *ray_origins,
 //                __global const float4 *ray_dirs,
@@ -70,8 +67,6 @@ public class BlinnPhongKernel extends AbstractOpenCLKernel<BlinnPhongKernelParam
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getLightingBuffers().getLightFallout()));
 
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getImageBuffer().getImage()));
-
-        return kernel;
     }
 
     @Override

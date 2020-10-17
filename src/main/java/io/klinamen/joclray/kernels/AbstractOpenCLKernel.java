@@ -38,10 +38,7 @@ public abstract class AbstractOpenCLKernel<TParams> extends AbstractOpenCLOperat
         this.kernelParams = kernelParams;
 
         buffersPoolManager.close();
-        if(kernel != null){
-            clReleaseKernel(kernel);
-            kernel = null;
-        }
+        releaseKernel();
     }
 
     protected TParams getParams() {
@@ -98,7 +95,13 @@ public abstract class AbstractOpenCLKernel<TParams> extends AbstractOpenCLOperat
 
     }
 
-    protected abstract cl_kernel buildKernel();
+    protected cl_kernel buildKernel(){
+        cl_kernel kernel = clCreateKernel(getProgram(), getKernelName(), null);
+        configureKernel(kernel);
+        return kernel;
+    }
+
+    protected abstract void configureKernel(cl_kernel kernel);
 
     protected abstract long[] getWorkgroupSize();
 

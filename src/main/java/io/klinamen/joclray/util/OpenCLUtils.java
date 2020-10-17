@@ -76,6 +76,14 @@ public class OpenCLUtils {
                 Sizeof.cl_float * hostBuffer.length, Pointer.to(hostBuffer), null);
     }
 
+    public static String defineOption(String name, int value){
+        return String.format("-D %s=%s", name, value);
+    }
+
+    public static String defineOption(String name, float value){
+        return String.format("-D %s=%ff", name, value);
+    }
+
     public static String defineOption(String name, String value){
         return String.format("-D %s=%s", name, value);
     }

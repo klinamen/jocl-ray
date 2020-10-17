@@ -7,7 +7,6 @@ import org.jocl.Sizeof;
 import org.jocl.cl_context;
 import org.jocl.cl_kernel;
 
-import static org.jocl.CL.clCreateKernel;
 import static org.jocl.CL.clSetKernelArg;
 
 public abstract class AbstractIntersectionKernel<T extends Surface> extends AbstractOpenCLKernel<IntersectionKernelParams<T>> implements IntersectionKernel<T> {
@@ -20,9 +19,7 @@ public abstract class AbstractIntersectionKernel<T extends Surface> extends Abst
     protected abstract void setAdditionalKernelArgs(int i, cl_kernel kernel);
 
     @Override
-    protected cl_kernel buildKernel() {
-        cl_kernel kernel = clCreateKernel(getProgram(), getKernelName(), null);
-
+    protected void configureKernel(cl_kernel kernel) {
 //        __kernel void XIntersect(
 //                const float4 rayOrigin,
 //                __global float4 *rayDirections,
@@ -39,8 +36,6 @@ public abstract class AbstractIntersectionKernel<T extends Surface> extends Abst
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getIntersectionBuffers().getHitMap()));
 
         setAdditionalKernelArgs(a, kernel);
-
-        return kernel;
     }
 
     @Override

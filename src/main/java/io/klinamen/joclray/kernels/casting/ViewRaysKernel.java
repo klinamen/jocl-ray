@@ -6,7 +6,6 @@ import org.jocl.Sizeof;
 import org.jocl.cl_context;
 import org.jocl.cl_kernel;
 
-import static org.jocl.CL.clCreateKernel;
 import static org.jocl.CL.clSetKernelArg;
 
 public class ViewRaysKernel extends AbstractOpenCLKernel<ViewRaysKernelParams> {
@@ -22,9 +21,7 @@ public class ViewRaysKernel extends AbstractOpenCLKernel<ViewRaysKernelParams> {
     }
 
     @Override
-    protected cl_kernel buildKernel() {
-        cl_kernel kernel = clCreateKernel(getProgram(), getKernelName(), null);
-
+    protected void configureKernel(cl_kernel kernel) {
 //        __kernel void viewRays(const int2 imageSize, const float4 e, const float fov_rad,
 //                __global float4 *origin,
 //                __global float4 *direction);
@@ -35,8 +32,6 @@ public class ViewRaysKernel extends AbstractOpenCLKernel<ViewRaysKernelParams> {
         clSetKernelArg(kernel, a++, Sizeof.cl_float, Pointer.to(new float[]{getParams().getFovRad()}));
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getBuffers().getRayOrigins()));
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getBuffers().getRayDirections()));
-
-        return kernel;
     }
 
     @Override

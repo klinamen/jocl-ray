@@ -4,7 +4,6 @@ import io.klinamen.joclray.kernels.AbstractOpenCLKernel;
 import io.klinamen.joclray.util.OpenCLUtils;
 import org.jocl.*;
 
-import static org.jocl.CL.clCreateKernel;
 import static org.jocl.CL.clSetKernelArg;
 
 public class ShadowRaysKernel extends AbstractOpenCLKernel<ShadowRaysKernelParams> {
@@ -20,9 +19,7 @@ public class ShadowRaysKernel extends AbstractOpenCLKernel<ShadowRaysKernelParam
     }
 
     @Override
-    protected cl_kernel buildKernel() {
-        cl_kernel kernel = clCreateKernel(getProgram(), getKernelName(), null);
-
+    protected void configureKernel(cl_kernel kernel) {
 //        __kernel void shadowRays(__global float4 *rayOrigin, __global float4 *rayDirections,
 //                __global float4 *hitNormals, __global float *hitDistance,
 //                __global int *hitMap, __global float4 *lightPos,
@@ -39,8 +36,6 @@ public class ShadowRaysKernel extends AbstractOpenCLKernel<ShadowRaysKernelParam
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(lightPos));
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getShadowRaysBuffers().getRayOrigins()));
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getShadowRaysBuffers().getRayDirections()));
-
-        return kernel;
     }
 
     @Override
