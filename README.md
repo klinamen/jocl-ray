@@ -6,9 +6,11 @@ JOCLRay is an attempt to implement basic ray tracing on GPU via OpenCL kernels, 
 - Object-oriented, dynamic scene description.
 - Supported surface types: Sphere, Plane, Box.
 - Supported light types: Point light, Spotlight with angle and attenuation.
-- "Shading" renderer implementing Blinn-Phong lighting model with shadows and an arbitrary number of reflection bounces.
 - "Visibility" renderer for visualizing intersection with view rays only.
+- "Shading" distribution ray-tracing renderer implementing Blinn-Phong lighting model with shadows, and configurable sampling resolution for glossy reflection and transmission.
 - Octrees acceleration structure.
+- Anti-aliasing with configurable sampling resolution.
+- Thin-lens depth pf field with configurable sampling resolution.
 
 ## How to build
 
@@ -81,14 +83,32 @@ GPU         | Rendering Time
 ----------- | -------------
 NVIDIA GeForce MX150    | 19.5s
 
+### Scene 4
+![Image of Scene3](./sample-images/scene4.png)
+
+- FOV (grad): 60
+- Image plane sampling (anti-aliasing): 16 rays per-pixel
+- Reflection rays sampling (glossy reflections): 64 rays
+- Transmission rays sampling (glossy transmission): 64 rays
+- Lens-space sampling (depth of field): 1 ray (no DoF)
+- Objects: 16
+  - 4 x Utah Teapot (6,320 tris) 
+- Reflection/Transmission splits max depth: 3
+- Acceleration structure: Octrees
+
+Rendering times on my laptop (Intel(R) Core(TM) i7-8550U CPU @ 1.80GHz, 16GB RAM, NVIDIA GeForce MX150) for both NVIDIA and Intel GPU. Reported rendering time is the average over 10 sequential runs, discarding the first one in which compilation of OpenCL kernels happens.
+
+GPU         | Rendering Time
+----------- | -------------
+NVIDIA GeForce MX150    | 6.9h
+
 ## Limitations and Future Work
 - Extend the renderer to make use of multiple OpenCL devices.
 - Surfaces in the scene are grouped by type and an intersection kernel is scheduled on the GPU for each group. Thus, each GPU thread calculates intersections for a `<ray, element>` pair. However, currently, there is no reduction step to merge the results and the memory access model may lead to the corruption of the buffer holding intersections results.
 - Shadow rays generation and their intersections are calculated on the GPU, whereas the results are merged on CPU into a light-intensity map that associates an intensity value to each `<ray,light>`. Try to move the whole process to GPU and find a more compact data structure to represent the contribution of each light for each primary ray.
 - Parallelize shading across lights.
 - Camera, lights and all the objects are axis-aligned, as there is no support for transformations.
-- Support more primitives and loading of polygonal models.
-- Support more material properties (e.g., refractive materials)
+- Instancing
 - Simplify code for wrappers and buffer management.
 - Unit tests
 - ...
