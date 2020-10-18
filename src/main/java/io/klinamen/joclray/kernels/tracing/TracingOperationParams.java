@@ -5,7 +5,7 @@ import io.klinamen.joclray.kernels.intersection.IntersectionKernelBuffers;
 import io.klinamen.joclray.kernels.shading.ImageBuffer;
 import io.klinamen.joclray.scene.Scene;
 
-public class TransmissionTracingOperationParams {
+public class TracingOperationParams {
     private final RaysBuffers viewRaysBuffer;
     private final IntersectionKernelBuffers intersectionBuffers;
     private final LightingBuffers lightingBuffers;
@@ -13,7 +13,7 @@ public class TransmissionTracingOperationParams {
 
     private final Scene scene;
 
-    public TransmissionTracingOperationParams(RaysBuffers viewRaysBuffer, IntersectionKernelBuffers intersectionBuffers, LightingBuffers lightingBuffers, ImageBuffer imageBuffer, Scene scene) {
+    public TracingOperationParams(RaysBuffers viewRaysBuffer, IntersectionKernelBuffers intersectionBuffers, LightingBuffers lightingBuffers, ImageBuffer imageBuffer, Scene scene) {
         this.viewRaysBuffer = viewRaysBuffer;
         this.intersectionBuffers = intersectionBuffers;
         this.lightingBuffers = lightingBuffers;

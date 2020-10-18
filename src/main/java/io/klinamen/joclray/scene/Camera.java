@@ -4,6 +4,8 @@ import io.klinamen.joclray.util.FloatVec4;
 
 public class Camera {
     private float fovGrad = 90;
+    private float aperture = 0;
+    private float focalLength = 22;
     private float frameWidth;
     private float frameHeight;
     private FloatVec4 from = new FloatVec4();
@@ -53,6 +55,15 @@ public class Camera {
         return (int)(getFrameWidth() * xPerc) + (int)(getFrameHeight() * yPerc) * (int)(getFrameWidth());
     }
 
+    public float getAperture() {
+        return aperture;
+    }
+
+    public Camera setAperture(float aperture) {
+        this.aperture = aperture;
+        return this;
+    }
+
     public int getPixels() {
         return getImageWidth() * getImageHeight();
     }
@@ -63,6 +74,15 @@ public class Camera {
 
     public int getImageHeight(){
         return (int) getFrameHeight();
+    }
+
+    public float getFocalLength() {
+        return focalLength;
+    }
+
+    public Camera setFocalLength(float focalLength) {
+        this.focalLength = focalLength;
+        return this;
     }
 
     public FloatVec4 getTo() {

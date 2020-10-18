@@ -1,4 +1,4 @@
-package io.klinamen.joclray.kernels.shading;
+package io.klinamen.joclray.kernels.tracing;
 
 import io.klinamen.joclray.kernels.AbstractOpenCLKernel;
 import io.klinamen.joclray.util.OpenCLUtils;

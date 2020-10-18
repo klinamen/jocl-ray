@@ -7,7 +7,6 @@ import io.klinamen.joclray.kernels.casting.RaysBuffers;
 import io.klinamen.joclray.kernels.intersection.IntersectionKernelBuffers;
 import io.klinamen.joclray.kernels.intersection.IntersectionOperation;
 import io.klinamen.joclray.kernels.intersection.IntersectionOperationParams;
-import io.klinamen.joclray.kernels.shading.SplitRaysKernelParams;
 import io.klinamen.joclray.kernels.shading.blinnphong.BlinnPhongKernel;
 import io.klinamen.joclray.kernels.shading.blinnphong.BlinnPhongKernelParams;
 import io.klinamen.joclray.kernels.shading.blinnphong.BlinnPhongMaterialPropsBuffers;
@@ -17,14 +16,14 @@ import org.jocl.cl_context;
 
 import static org.jocl.CL.clEnqueueFillBuffer;
 
-public class RecTransmissionTracingOperation extends AbstractOpenCLOperation implements OpenCLKernel<TransmissionTracingOperationParams> {
+public class RecTransmissionTracingOperation extends AbstractOpenCLOperation implements OpenCLKernel<TracingOperationParams> {
     private final cl_context context;
     private final IntersectionOperation intersection;
     private final BlinnPhongKernel shading;
     private final int maxGeneration;
     private final AbstractOpenCLKernel<SplitRaysKernelParams> splitRaysDist;
 
-    private TransmissionTracingOperationParams params;
+    private TracingOperationParams params;
 
     public RecTransmissionTracingOperation(cl_context context, IntersectionOperation intersection, AbstractOpenCLKernel<SplitRaysKernelParams> splitRaysDist, BlinnPhongKernel shading, int maxGeneration) {
         this.context = context;
@@ -113,7 +112,7 @@ public class RecTransmissionTracingOperation extends AbstractOpenCLOperation imp
     }
 
     @Override
-    public void setParams(TransmissionTracingOperationParams kernelParams) {
+    public void setParams(TracingOperationParams kernelParams) {
         this.params = kernelParams;
     }
 }

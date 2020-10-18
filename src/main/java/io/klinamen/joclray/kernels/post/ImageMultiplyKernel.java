@@ -1,5 +1,6 @@
-package io.klinamen.joclray.kernels;
+package io.klinamen.joclray.kernels.post;
 
+import io.klinamen.joclray.kernels.AbstractOpenCLKernel;
 import org.jocl.Pointer;
 import org.jocl.Sizeof;
 import org.jocl.cl_context;

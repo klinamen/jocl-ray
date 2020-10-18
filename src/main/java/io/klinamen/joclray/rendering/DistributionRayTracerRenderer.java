@@ -1,10 +1,6 @@
 package io.klinamen.joclray.rendering;
 
 import io.klinamen.joclray.display.ShadingDisplay;
-import io.klinamen.joclray.kernels.ImageMultiplyKernel;
-import io.klinamen.joclray.kernels.ImageMultiplyKernelParams;
-import io.klinamen.joclray.kernels.LightIntensityMapOperation;
-import io.klinamen.joclray.kernels.LightIntensityMapOperationParams;
 import io.klinamen.joclray.kernels.casting.RaysBuffers;
 import io.klinamen.joclray.kernels.casting.ShadowRaysKernel;
 import io.klinamen.joclray.kernels.casting.ViewRaysJitterKernel;
@@ -14,18 +10,22 @@ import io.klinamen.joclray.kernels.intersection.IntersectionOperation;
 import io.klinamen.joclray.kernels.intersection.IntersectionOperationParams;
 import io.klinamen.joclray.kernels.intersection.factory.IntersectionKernelFactory;
 import io.klinamen.joclray.kernels.intersection.factory.RegistryIntersectionKernelFactory;
+import io.klinamen.joclray.kernels.post.ImageMultiplyKernel;
+import io.klinamen.joclray.kernels.post.ImageMultiplyKernelParams;
 import io.klinamen.joclray.kernels.shading.ImageBuffer;
-import io.klinamen.joclray.kernels.shading.SplitRaysDistKernel;
+import io.klinamen.joclray.kernels.shading.LightIntensityMapOperation;
+import io.klinamen.joclray.kernels.shading.LightIntensityMapOperationParams;
 import io.klinamen.joclray.kernels.shading.blinnphong.BlinnPhongKernel;
 import io.klinamen.joclray.kernels.tracing.LightingBuffers;
-import io.klinamen.joclray.kernels.tracing.TransmissionTracingOperation;
-import io.klinamen.joclray.kernels.tracing.TransmissionTracingOperationParams;
+import io.klinamen.joclray.kernels.tracing.SplitRaysDistKernel;
+import io.klinamen.joclray.kernels.tracing.TracingOperation;
+import io.klinamen.joclray.kernels.tracing.TracingOperationParams;
 import io.klinamen.joclray.scene.Scene;
 import io.klinamen.joclray.util.FloatVec4;
 
 import java.awt.image.BufferedImage;
 
-public class MultiPassTransmissionRenderer extends OpenCLRenderer implements AutoCloseable {
+public class DistributionRayTracerRenderer extends OpenCLRenderer implements AutoCloseable {
     private final IntersectionKernelFactory intersectionKernelFactory = new RegistryIntersectionKernelFactory(getContext());
 
     private final ViewRaysJitterKernel viewRaysKernel = new ViewRaysJitterKernel(getContext());
@@ -37,17 +37,16 @@ public class MultiPassTransmissionRenderer extends OpenCLRenderer implements Aut
     private final LightIntensityMapOperation lightIntensityMapOperation = new LightIntensityMapOperation(getContext(), shadowRaysKernel, intersectionOp);
 
 //    private final SplitRaysKernel splitRaysKernel = new SplitRaysKernel(getContext());
+    private final SplitRaysDistKernel splitRaysKernel = new SplitRaysDistKernel(getContext(), 16, 0.04f);
+    private final TracingOperation tracingOperation = new TracingOperation(getContext(), intersectionOp, splitRaysKernel, shadingKernel, 3);
 
-    private final SplitRaysDistKernel splitRaysKernel = new SplitRaysDistKernel(getContext(), 1, 0.04f);
-    private final TransmissionTracingOperation tracingOperation = new TransmissionTracingOperation(getContext(), intersectionOp, splitRaysKernel, shadingKernel, 3);
-//    private final RecTransmissionTracingOperation tracingOperation = new RecTransmissionTracingOperation(getContext(), intersectionOp, splitRaysKernel, shadingKernel, 3);
-//    private final DistTransmissionTracingOperation tracingOperation = new DistTransmissionTracingOperation(getContext(), intersectionOp, splitRaysKernel, shadingKernel, 3);
+    private final int ipsSamples;
+    private final int essSamples;
 
-    private final int samples;
-
-    public MultiPassTransmissionRenderer(int platformIndex, int deviceIndex, int samples) {
+    public DistributionRayTracerRenderer(int platformIndex, int deviceIndex, int ipsSamples, int essSamples) {
         super(platformIndex, deviceIndex);
-        this.samples = samples;
+        this.ipsSamples = ipsSamples;
+        this.essSamples = essSamples;
     }
 
     @Override
@@ -56,26 +55,30 @@ public class MultiPassTransmissionRenderer extends OpenCLRenderer implements Aut
         float[] outImageBuf = new float[nPixels * FloatVec4.DIM];
 
         try (ImageBuffer imageBuffer = ImageBuffer.create(getContext(), outImageBuf)) {
-            for (int i = 0; i < samples; i++) {
-                for (int j = 0; j < samples; j++) {
-                    System.out.printf("Image plane sample (%d/%d, %d/%d)" + System.lineSeparator(), i + 1, samples, j + 1, samples);
+            for (int k = 0; k < essSamples; k++) {
+                System.out.printf("Eye-space sample (%d/%d)" + System.lineSeparator(), k + 1, essSamples);
 
-                    try (RaysBuffers viewRaysBuffers = RaysBuffers.empty(getContext(), scene.getCamera().getPixels())) {
-                        // generate view rays
-                        viewRaysKernel.setParams(new ViewRaysJitterKernelParams(
-                                scene.getCamera().getImageWidth(), scene.getCamera().getImageHeight(),
-                                scene.getOrigin(), scene.getCamera().getFovRad(),
-                                viewRaysBuffers, samples, samples, i, j
-                        ));
-                        viewRaysKernel.enqueue(getQueue());
+                for (int i = 0; i < ipsSamples; i++) {
+                    for (int j = 0; j < ipsSamples; j++) {
+                        System.out.printf("Image plane sample (%d/%d, %d/%d)" + System.lineSeparator(), i + 1, ipsSamples, j + 1, ipsSamples);
 
-                        pass(scene, imageBuffer, viewRaysBuffers);
+                        try (RaysBuffers viewRaysBuffers = RaysBuffers.empty(getContext(), scene.getCamera().getPixels())) {
+                            // generate view rays
+                            viewRaysKernel.setParams(new ViewRaysJitterKernelParams(
+                                    scene.getCamera().getImageWidth(), scene.getCamera().getImageHeight(), scene.getOrigin(),
+                                    scene.getCamera().getFovRad(), scene.getCamera().getAperture(), scene.getCamera().getFocalLength(),
+                                    viewRaysBuffers, ipsSamples, ipsSamples, i, j
+                            ));
+                            viewRaysKernel.enqueue(getQueue());
+
+                            pass(scene, imageBuffer, viewRaysBuffers);
+                        }
                     }
                 }
             }
 
             // Average pixel values
-            imageMultiplyKernel.setParams(new ImageMultiplyKernelParams(1.0f / (float) (samples * samples * splitRaysKernel.getSamples()), imageBuffer));
+            imageMultiplyKernel.setParams(new ImageMultiplyKernelParams(1.0f / (float) (essSamples * ipsSamples * ipsSamples * splitRaysKernel.getSamples()), imageBuffer));
             imageMultiplyKernel.enqueue(getQueue());
 
             imageBuffer.readTo(getQueue(), outImageBuf);
@@ -102,22 +105,10 @@ public class MultiPassTransmissionRenderer extends OpenCLRenderer implements Aut
                 for (int i = 0; i < splitRaysKernel.getSamples(); i++) {
                     System.out.println(String.format("Reflection/Transmission sample %d/%d", i + 1, splitRaysKernel.getSamples()));
 
-//                    if(i > 0) {
-//                        // reset primary ray intersections
-//                        intersectionOp.setParams(new IntersectionOperationParams(scene.getSurfaces(), viewRaysBuffers, viewRaysIntersectionsBuffers));
-//                        intersectionOp.enqueue(getQueue());
-//                    }
-
                     splitRaysKernel.seed();
-                    tracingOperation.setParams(new TransmissionTracingOperationParams(viewRaysBuffers, viewRaysIntersectionsBuffers, lb, imageBuffer, scene));
+                    tracingOperation.setParams(new TracingOperationParams(viewRaysBuffers, viewRaysIntersectionsBuffers, lb, imageBuffer, scene));
                     tracingOperation.enqueue(getQueue());
                 }
-
-//                if (splitRaysKernel.getSamples() > 1) {
-//                    // Average pixel values
-//                    imageMultiplyKernel.setParams(new ImageMultiplyKernelParams(1.0f / (float) (splitRaysKernel.getSamples()), imageBuffer));
-//                    imageMultiplyKernel.enqueue(getQueue());
-//                }
             }
         }
     }

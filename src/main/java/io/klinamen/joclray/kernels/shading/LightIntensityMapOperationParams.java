@@ -1,4 +1,4 @@
-package io.klinamen.joclray.kernels;
+package io.klinamen.joclray.kernels.shading;
 
 import io.klinamen.joclray.geom.Surface;
 import io.klinamen.joclray.kernels.casting.RaysBuffers;

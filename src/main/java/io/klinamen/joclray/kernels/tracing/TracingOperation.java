@@ -6,7 +6,6 @@ import io.klinamen.joclray.kernels.OpenCLKernel;
 import io.klinamen.joclray.kernels.intersection.IntersectionKernelBuffers;
 import io.klinamen.joclray.kernels.intersection.IntersectionOperation;
 import io.klinamen.joclray.kernels.intersection.IntersectionOperationParams;
-import io.klinamen.joclray.kernels.shading.SplitRaysKernelParams;
 import io.klinamen.joclray.kernels.shading.blinnphong.BlinnPhongKernel;
 import io.klinamen.joclray.kernels.shading.blinnphong.BlinnPhongKernelParams;
 import io.klinamen.joclray.kernels.shading.blinnphong.BlinnPhongMaterialPropsBuffers;
@@ -19,7 +18,7 @@ import java.util.Queue;
 
 import static org.jocl.CL.clEnqueueFillBuffer;
 
-public class TransmissionTracingOperation extends AbstractOpenCLOperation implements OpenCLKernel<TransmissionTracingOperationParams> {
+public class TracingOperation extends AbstractOpenCLOperation implements OpenCLKernel<TracingOperationParams> {
     private final cl_context context;
     private final IntersectionOperation intersection;
     private final AbstractOpenCLKernel<SplitRaysKernelParams> splitRays;
@@ -27,9 +26,9 @@ public class TransmissionTracingOperation extends AbstractOpenCLOperation implem
 
     private final int maxGeneration;
 
-    private TransmissionTracingOperationParams params;
+    private TracingOperationParams params;
 
-    public TransmissionTracingOperation(cl_context context, IntersectionOperation intersection, AbstractOpenCLKernel<SplitRaysKernelParams> splitRays, BlinnPhongKernel shading, int maxGeneration) {
+    public TracingOperation(cl_context context, IntersectionOperation intersection, AbstractOpenCLKernel<SplitRaysKernelParams> splitRays, BlinnPhongKernel shading, int maxGeneration) {
         this.context = context;
         this.intersection = intersection;
         this.splitRays = splitRays;
@@ -43,8 +42,6 @@ public class TransmissionTracingOperation extends AbstractOpenCLOperation implem
              BlinnPhongMaterialPropsBuffers materialPropsBuffers = BlinnPhongMaterialPropsBuffers.create(context, params.getScene());
              IntersectionKernelBuffers ib = IntersectionKernelBuffers.empty(context, params.getViewRaysBuffer().getRays())
         ) {
-//            IntersectionKernelBuffers ib = params.getIntersectionBuffers();
-
             Queue<RaysGen> qShading = new LinkedList<>();
             qShading.add(new RaysGen(WeightedRaysBuffer.from(context, params.getViewRaysBuffer()), "p"));
 
@@ -52,16 +49,15 @@ public class TransmissionTracingOperation extends AbstractOpenCLOperation implem
                 try (RaysGen rayGen = qShading.poll()) {
                     WeightedRaysBuffer raysBuffer = rayGen.getBuffer();
 
-                    System.out.printf("*** Processing (%s), gen %d/%d ***" + System.lineSeparator(), rayGen.getName(), rayGen.getGeneration(), maxGeneration);
+                    System.out.printf("Tracing (%s), gen %d/%d ***" + System.lineSeparator(), rayGen.getName(), rayGen.getGeneration(), maxGeneration);
 
-//                    if (rayGen.getGeneration() > 0) {
-                        // reset hitmap
-                        clEnqueueFillBuffer(queue, ib.getHitMap(), Pointer.to(new int[]{-1}), 1, 0, params.getImageBuffer().getSize(), 0, null, null);
+                    // reset hitmap
+                    // TODO move to IntersectionOperation?
+                    clEnqueueFillBuffer(queue, ib.getHitMap(), Pointer.to(new int[]{-1}), 1, 0, params.getImageBuffer().getSize(), 0, null, null);
 
-                        // intersection test skipped for primary rays, as the intersection buffer already contains the result
-                        intersection.setParams(new IntersectionOperationParams(params.getScene().getSurfaces(), raysBuffer.getRaysBuffers(), ib));
-                        intersection.enqueue(queue);
-//                    }
+                    // intersection test skipped for primary rays, as the intersection buffer already contains the result
+                    intersection.setParams(new IntersectionOperationParams(params.getScene().getSurfaces(), raysBuffer.getRaysBuffers(), ib));
+                    intersection.enqueue(queue);
 
                     shading.setParams(new BlinnPhongKernelParams(raysBuffer,
                             ib,
@@ -100,7 +96,7 @@ public class TransmissionTracingOperation extends AbstractOpenCLOperation implem
     }
 
     @Override
-    public void setParams(TransmissionTracingOperationParams kernelParams) {
+    public void setParams(TracingOperationParams kernelParams) {
         this.params = kernelParams;
     }
 }

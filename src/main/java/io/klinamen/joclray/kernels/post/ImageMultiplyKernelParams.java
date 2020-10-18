@@ -1,4 +1,4 @@
-package io.klinamen.joclray.kernels;
+package io.klinamen.joclray.kernels.post;
 
 import io.klinamen.joclray.kernels.shading.ImageBuffer;
 

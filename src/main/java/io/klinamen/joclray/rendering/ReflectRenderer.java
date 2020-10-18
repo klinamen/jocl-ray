@@ -1,8 +1,6 @@
 package io.klinamen.joclray.rendering;
 
 import io.klinamen.joclray.display.ShadingDisplay;
-import io.klinamen.joclray.kernels.LightIntensityMapOperation;
-import io.klinamen.joclray.kernels.LightIntensityMapOperationParams;
 import io.klinamen.joclray.kernels.casting.*;
 import io.klinamen.joclray.kernels.intersection.IntersectResult;
 import io.klinamen.joclray.kernels.intersection.IntersectionKernelBuffers;
@@ -10,6 +8,8 @@ import io.klinamen.joclray.kernels.intersection.IntersectionOperation;
 import io.klinamen.joclray.kernels.intersection.IntersectionOperationParams;
 import io.klinamen.joclray.kernels.intersection.factory.IntersectionKernelFactory;
 import io.klinamen.joclray.kernels.intersection.factory.RegistryIntersectionKernelFactory;
+import io.klinamen.joclray.kernels.shading.LightIntensityMapOperation;
+import io.klinamen.joclray.kernels.shading.LightIntensityMapOperationParams;
 import io.klinamen.joclray.kernels.shading.old.ShadingKernel;
 import io.klinamen.joclray.kernels.shading.old.ShadingKernelBuffers;
 import io.klinamen.joclray.kernels.shading.old.ShadingKernelParams;
@@ -19,7 +19,7 @@ import io.klinamen.joclray.util.FloatVec4;
 
 import java.awt.image.BufferedImage;
 
-public class FullRenderer extends OpenCLRenderer implements AutoCloseable {
+public class ReflectRenderer extends OpenCLRenderer implements AutoCloseable {
     private final IntersectionKernelFactory intersectionKernelFactory = new RegistryIntersectionKernelFactory(getContext());
 
     private final ViewRaysKernel viewRaysKernel = new ViewRaysKernel(getContext());
@@ -30,11 +30,11 @@ public class FullRenderer extends OpenCLRenderer implements AutoCloseable {
     private final LightIntensityMapOperation lightIntensityMapOperation = new LightIntensityMapOperation(getContext(), shadowRaysKernel, intersectionOp);
     private final ShadingOperation shadingOperation = new ShadingOperation(intersectionOp, shadingKernel, 4);
 
-    public FullRenderer() {
+    public ReflectRenderer() {
 
     }
 
-    public FullRenderer(int platformIndex, int deviceIndex) {
+    public ReflectRenderer(int platformIndex, int deviceIndex) {
         super(platformIndex, deviceIndex);
     }
 

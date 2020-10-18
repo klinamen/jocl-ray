@@ -1,5 +1,7 @@
-package io.klinamen.joclray.kernels;
+package io.klinamen.joclray.kernels.shading;
 
+import io.klinamen.joclray.kernels.AbstractOpenCLOperation;
+import io.klinamen.joclray.kernels.OpenCLKernel;
 import io.klinamen.joclray.kernels.casting.RaysBuffers;
 import io.klinamen.joclray.kernels.casting.RaysGenerationResult;
 import io.klinamen.joclray.kernels.casting.ShadowRaysKernel;

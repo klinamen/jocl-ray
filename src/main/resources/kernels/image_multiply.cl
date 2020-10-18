@@ -1,4 +1,4 @@
-#define DEBUG_RAY 1291857
+// #define DEBUG_RAY 1291857
 
 __kernel void image_multiply(const float weight, __global float4 *image) {
   int pixel = get_global_id(0);

@@ -22,18 +22,26 @@ public class ViewRaysJitterKernel extends AbstractOpenCLKernel<ViewRaysJitterKer
 
     @Override
     protected void configureKernel(cl_kernel kernel) {
-//        __kernel void view_rays_jitter(const float2 frameSize, const float4 e, const float fov_rad,
-//                              const ulong seed,   // random seed
-//                              const int2 samples, // per-pixel samples
-//                              const int2 index,   // sample index
-//                            __global float4 *origins,
-//                            __global float4 *directions);
+//        __kernel void view_rays_jitter(const float2 frameSize,
+//                              const float4 e,           // eye origin
+//                              const float fov_rad,      // field of view angle (rad)
+//                              const float aperture,     // aperture size for eye space sampling
+//                              const float focal_length, // focal length
+//                              const ulong ess_seed,     // random seed for eye space sampling
+//                              const ulong ips_seed,     // random seed for image plane sampling
+//                              const int2 ips_samples,   // per-pixel ips_samples
+//                              const int2 ips_index,     // image plane sample index
+//                              __global float4 *origins,
+//                __global float4 *directions);
 
         int a = 0;
         clSetKernelArg(kernel, a++, Sizeof.cl_float2, Pointer.to(new float[]{getParams().getImageWidth(), getParams().getImageHeight()}));
         clSetKernelArg(kernel, a++, Sizeof.cl_float4, Pointer.to(getParams().getViewOrigin().getArray()));
         clSetKernelArg(kernel, a++, Sizeof.cl_float, Pointer.to(new float[]{getParams().getFovRad()}));
-        clSetKernelArg(kernel, a++, Sizeof.cl_long, Pointer.to(new long[]{getParams().getSeed()}));
+        clSetKernelArg(kernel, a++, Sizeof.cl_float, Pointer.to(new float[]{getParams().getAperture()}));
+        clSetKernelArg(kernel, a++, Sizeof.cl_float, Pointer.to(new float[]{getParams().getFocalLength()}));
+        clSetKernelArg(kernel, a++, Sizeof.cl_long, Pointer.to(new long[]{getParams().getEssSeed()}));
+        clSetKernelArg(kernel, a++, Sizeof.cl_long, Pointer.to(new long[]{getParams().getIpsSeed()}));
         clSetKernelArg(kernel, a++, Sizeof.cl_int2, Pointer.to(new int[]{getParams().gethSamples(), getParams().getvSamples()}));
         clSetKernelArg(kernel, a++, Sizeof.cl_int2, Pointer.to(new int[]{getParams().getxIndex(), getParams().getyIndex()}));
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getBuffers().getRayOrigins()));
