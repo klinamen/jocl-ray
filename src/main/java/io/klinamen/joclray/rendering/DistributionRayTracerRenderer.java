@@ -37,7 +37,7 @@ public class DistributionRayTracerRenderer extends OpenCLRenderer implements Aut
     private final LightIntensityMapOperation lightIntensityMapOperation = new LightIntensityMapOperation(getContext(), shadowRaysKernel, intersectionOp);
 
 //    private final SplitRaysKernel splitRaysKernel = new SplitRaysKernel(getContext());
-    private final SplitRaysDistKernel splitRaysKernel = new SplitRaysDistKernel(getContext(), 16, 0.04f);
+    private final SplitRaysDistKernel splitRaysKernel = new SplitRaysDistKernel(getContext(), 4, 0.04f);
     private final TracingOperation tracingOperation = new TracingOperation(getContext(), intersectionOp, splitRaysKernel, shadingKernel, 3);
 
     private final int ipsSamples;

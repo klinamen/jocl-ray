@@ -11,8 +11,6 @@ inline float noise3D(float x, float y, float z) {
 }
 
 inline float4 perturbate(float4 r, float l, ulong seed){
-  // float rnd_x = noise3D(seed + 1017 * r.x + 2521 * l, seed + 3823 * r.y + 5659 * l, seed + 8069 * r.z + 8707 * l);
-  // float rnd_y = noise3D(seed + 3727 * r.x + 4801 * l, seed + 5081 * r.y + 6011 * l, seed + 8689 * r.z + 9677 * l);
   float rnd_x = noise3D(r.x * l * 1017, r.y * l * 2521, seed * r.z);
   float rnd_y = noise3D(r.x * seed, r.y * seed, r.z * l * 3823);
   float4 r1 = normalize(r + (float4)(-l/2 + rnd_x * l, -l/2 + rnd_y * l, 0, 0));
@@ -29,6 +27,9 @@ inline float4 perturbate(float4 r, float l, ulong seed){
   return r1;
 }
 
+/**
+ * Implementation adapted from https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-to-shading/reflection-refraction-fresnel 
+ */
 inline float fresnel(float ni, float nt, float4 rd, float4 hn) 
 { 
     float cosi = dot(rd, hn);
@@ -61,6 +62,9 @@ inline float fresnel(float ni, float nt, float4 rd, float4 hn)
   return r;
 }
 
+/**
+ * Implementation adapted from https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-to-shading/reflection-refraction-fresnel 
+ */
 inline float4 refract(float ni, float nt, float4 rd, float4 hn) 
 { 
     float cosi = dot(rd, hn); 
