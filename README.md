@@ -104,11 +104,11 @@ NVIDIA GeForce MX150    | 6.9h
 
 #### Depth of Field
 ![Image of Scene4 with DoF](./sample-images/scene4_dof.png)
-To show depth of field effect, the same scene was rendered with an aperture size of 1.8 and a focal length of 22. 
+To show depth of field effect, the same scene was rendered with an aperture size of 1.25 and a focal length of 22. 
 
 - FOV (grad): 60
 - Focal length: 22
-- Aperture size: 1.8
+- Aperture size: 1.25
 - Image plane sampling (anti-aliasing): 4 rays per-pixel (2x2), jittered
 - Reflection rays sampling (glossy reflections): 4 rays
 - Transmission rays sampling (glossy transmission): 4 rays

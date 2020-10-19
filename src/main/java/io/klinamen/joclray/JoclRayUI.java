@@ -179,7 +179,7 @@ public class JoclRayUI implements Runnable {
             case Visibility:
                 return new VisibilityRenderer(platformIndex, deviceIndex);
             case Shading:
-                return new DistributionRayTracerRenderer(platformIndex, deviceIndex, 1, 1);
+                return new DistributionRayTracerRenderer(platformIndex, deviceIndex, 2, 16);
         }
 
         throw new UnsupportedOperationException("Unsupported renderer type: " + rendererType);

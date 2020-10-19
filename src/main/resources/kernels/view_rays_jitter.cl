@@ -14,6 +14,7 @@ __kernel void view_rays_jitter(const float2 frameSize,
                               const ulong ips_seed,     // random seed for image plane sampling
                               const int2 ips_samples,   // per-pixel ips_samples
                               const int2 ips_index,     // image plane sample index
+                              const int ess_index,     // eye space sample index
                               __global float4 *origins,
                               __global float4 *directions) {
   int py = get_global_id(0); // image-plane row
@@ -41,9 +42,9 @@ __kernel void view_rays_jitter(const float2 frameSize,
 
   if(aperture > 0){
     float4 p = e + focal_length * rd;
-
-    float ess_rnd_x = noise3D(py * 3455.3377, py * 7243.336, ess_seed * (px ^ py));
-    float ess_rnd_y = noise3D(px * 7865.4678, px * 3645.9948, ess_seed * ess_rnd_x);
+    float ess_rnd_x = noise3D(px * 3455.3377 * (ess_index ^ ess_seed), py * 7243.336 * (ess_index ^ ess_seed), ess_seed * (px ^ py));
+    float ess_rnd_y = noise3D(py * 7865.4678 * (ess_index ^ ess_seed), px * 3645.9948 * (ess_index ^ ess_seed), ess_seed * (px ^ py));
+  
     e.x += -aperture/2 + aperture * ess_rnd_x;
     e.y += -aperture/2 + aperture * ess_rnd_y;
 

@@ -7,31 +7,34 @@ public class ViewRaysJitterKernelParams extends ViewRaysKernelParams {
     private final float focalLength;
     private final int hSamples;
     private final int vSamples;
-    private final int xIndex;
-    private final int yIndex;
+    private final int xIpsIndex;
+    private final int yIpsIndex;
+    private final int essIndex;
     private final long ipsSeed;
     private final long essSeed;
 
-    public ViewRaysJitterKernelParams(int imageWidth, int imageHeight, FloatVec4 viewOrigin, float fovRad, RaysBuffers buffers, float aperture, float focalLength, int hSamples, int vSamples, int xIndex, int yIndex, long ipsSeed, long essSeed) {
+    public ViewRaysJitterKernelParams(int imageWidth, int imageHeight, FloatVec4 viewOrigin, float fovRad, RaysBuffers buffers, float aperture, float focalLength, int hSamples, int vSamples, int xIpsIndex, int yIpsIndex, int essIndex, long ipsSeed, long essSeed) {
         super(imageWidth, imageHeight, viewOrigin, fovRad, buffers);
         this.aperture = aperture;
         this.focalLength = focalLength;
         this.hSamples = hSamples;
         this.vSamples = vSamples;
-        this.xIndex = xIndex;
-        this.yIndex = yIndex;
+        this.xIpsIndex = xIpsIndex;
+        this.yIpsIndex = yIpsIndex;
+        this.essIndex = essIndex;
         this.ipsSeed = ipsSeed;
         this.essSeed = essSeed;
     }
 
-    public ViewRaysJitterKernelParams(int imageWidth, int imageHeight, FloatVec4 viewOrigin, float fovRad, float aperture, float focalLength, RaysBuffers buffers, int hSamples, int vSamples, int xIndex, int yIndex) {
+    public ViewRaysJitterKernelParams(int imageWidth, int imageHeight, FloatVec4 viewOrigin, float fovRad, float aperture, float focalLength, RaysBuffers buffers, int hSamples, int vSamples, int xIpsIndex, int yIpsIndex, int essIndex) {
         super(imageWidth, imageHeight, viewOrigin, fovRad, buffers);
         this.aperture = aperture;
         this.focalLength = focalLength;
         this.hSamples = hSamples;
         this.vSamples = vSamples;
-        this.xIndex = xIndex;
-        this.yIndex = yIndex;
+        this.xIpsIndex = xIpsIndex;
+        this.yIpsIndex = yIpsIndex;
+        this.essIndex = essIndex;
         this.ipsSeed = (long) (Long.MAX_VALUE * Math.random());
         this.essSeed = (long) (Long.MAX_VALUE * Math.random());
     }
@@ -44,12 +47,16 @@ public class ViewRaysJitterKernelParams extends ViewRaysKernelParams {
         return vSamples;
     }
 
-    public int getxIndex() {
-        return xIndex;
+    public int getxIpsIndex() {
+        return xIpsIndex;
     }
 
-    public int getyIndex() {
-        return yIndex;
+    public int getEssIndex() {
+        return essIndex;
+    }
+
+    public int getyIpsIndex() {
+        return yIpsIndex;
     }
 
     public long getIpsSeed() {

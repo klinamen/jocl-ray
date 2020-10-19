@@ -67,7 +67,7 @@ public class DistributionRayTracerRenderer extends OpenCLRenderer implements Aut
                             viewRaysKernel.setParams(new ViewRaysJitterKernelParams(
                                     scene.getCamera().getImageWidth(), scene.getCamera().getImageHeight(), scene.getOrigin(),
                                     scene.getCamera().getFovRad(), scene.getCamera().getAperture(), scene.getCamera().getFocalLength(),
-                                    viewRaysBuffers, ipsSamples, ipsSamples, i, j
+                                    viewRaysBuffers, ipsSamples, ipsSamples, i, j, k
                             ));
                             viewRaysKernel.enqueue(getQueue());
 

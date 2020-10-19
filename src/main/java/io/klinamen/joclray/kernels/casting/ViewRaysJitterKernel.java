@@ -43,13 +43,14 @@ public class ViewRaysJitterKernel extends AbstractOpenCLKernel<ViewRaysJitterKer
         clSetKernelArg(kernel, a++, Sizeof.cl_long, Pointer.to(new long[]{getParams().getEssSeed()}));
         clSetKernelArg(kernel, a++, Sizeof.cl_long, Pointer.to(new long[]{getParams().getIpsSeed()}));
         clSetKernelArg(kernel, a++, Sizeof.cl_int2, Pointer.to(new int[]{getParams().gethSamples(), getParams().getvSamples()}));
-        clSetKernelArg(kernel, a++, Sizeof.cl_int2, Pointer.to(new int[]{getParams().getxIndex(), getParams().getyIndex()}));
+        clSetKernelArg(kernel, a++, Sizeof.cl_int2, Pointer.to(new int[]{getParams().getxIpsIndex(), getParams().getyIpsIndex()}));
+        clSetKernelArg(kernel, a++, Sizeof.cl_int, Pointer.to(new int[]{getParams().getEssIndex()}));
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getBuffers().getRayOrigins()));
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getBuffers().getRayDirections()));
     }
 
     @Override
     protected long[] getWorkgroupSize() {
-        return new long[]{ getParams().getImageHeight(), getParams().getImageWidth() };
+        return new long[]{getParams().getImageHeight(), getParams().getImageWidth()};
     }
 }

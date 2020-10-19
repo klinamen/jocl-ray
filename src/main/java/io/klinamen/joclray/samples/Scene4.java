@@ -15,7 +15,8 @@ public class Scene4 {
     public static Scene build() {
         return new Scene(new Camera()
                 .setFovGrad(60)
-//                .setAperture(1.2f)
+                .setAperture(1.25f)
+                .setFocalLength(22)
         )
                 .setAmbientLightIntensity(0.2f)
                 .add(new PointLight()
@@ -156,7 +157,7 @@ public class Scene4 {
     }
 
     private static TriangleMesh teapot() {
-        return (TriangleMesh) Meshes.teapotLow()
+        return (TriangleMesh) Meshes.teapot()
                 .transform(new CompositeTransformation()
                         .add(RotateXTransformation.withGradAngle(-90))
                         .add(RotateYTransformation.withGradAngle(180))
