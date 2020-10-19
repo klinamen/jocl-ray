@@ -84,10 +84,10 @@ GPU         | Rendering Time
 NVIDIA GeForce MX150    | 19.5s
 
 ### Scene 4
-![Image of Scene3](./sample-images/scene4.png)
+![Image of Scene4](./sample-images/scene4.png)
 
 - FOV (grad): 60
-- Image plane sampling (anti-aliasing): 16 rays per-pixel
+- Image plane sampling (anti-aliasing): 16 rays per-pixel (4x4), jittered
 - Reflection rays sampling (glossy reflections): 64 rays
 - Transmission rays sampling (glossy transmission): 64 rays
 - Lens-space sampling (depth of field): 1 ray (no DoF)
@@ -101,6 +101,26 @@ Rendering times on my laptop (Intel(R) Core(TM) i7-8550U CPU @ 1.80GHz, 16GB RAM
 GPU         | Rendering Time
 ----------- | -------------
 NVIDIA GeForce MX150    | 6.9h
+
+#### Depth of Field
+![Image of Scene4 with DoF](./sample-images/scene4_dof.png)
+To show depth of field effect, the same scene was rendered with an aperture size of 1.8 and a focal length of 22. 
+
+- FOV (grad): 60
+- Focal length: 22
+- Aperture size: 1.8
+- Image plane sampling (anti-aliasing): 4 rays per-pixel (2x2), jittered
+- Reflection rays sampling (glossy reflections): 4 rays
+- Transmission rays sampling (glossy transmission): 4 rays
+- Lens-space sampling (depth of field): 16 rays
+- Objects: 16
+  - 4 x Utah Teapot (6,320 tris) 
+- Reflection/Transmission splits max depth: 3
+- Acceleration structure: Octrees
+
+GPU         | Rendering Time
+----------- | -------------
+NVIDIA GeForce MX150    | 2.2h
 
 ## Limitations and Future Work
 - Extend the renderer to make use of multiple OpenCL devices.
