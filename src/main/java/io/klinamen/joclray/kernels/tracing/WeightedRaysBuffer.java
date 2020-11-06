@@ -28,8 +28,12 @@ public class WeightedRaysBuffer extends KernelBuffersPool {
     }
 
     public static WeightedRaysBuffer from(cl_context context, RaysBuffers raysBuffers) {
+        return from(context, raysBuffers, DEFAULT_RAY_WEIGHT);
+    }
+
+    public static WeightedRaysBuffer from(cl_context context, RaysBuffers raysBuffers, float val) {
         return new WeightedRaysBuffer(raysBuffers,
-                OpenCLUtils.allocateReadWriteMem(context, raysBuffers.getRays() * FloatVec4.DIM, DEFAULT_RAY_WEIGHT)
+                OpenCLUtils.allocateReadWriteMem(context, raysBuffers.getRays() * FloatVec4.DIM, val)
         );
     }
 

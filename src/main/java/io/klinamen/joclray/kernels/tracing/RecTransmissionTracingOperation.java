@@ -92,7 +92,7 @@ public class RecTransmissionTracingOperation extends AbstractOpenCLOperation imp
 
     protected void intersect(cl_command_queue queue, RaysBuffers raysBuffers, IntersectionKernelBuffers ib){
         // reset hitmap
-        clEnqueueFillBuffer(queue, ib.getHitMap(), Pointer.to(new int[]{-1}), 1, 0, params.getImageBuffer().getSize(), 0, null, null);
+        clEnqueueFillBuffer(queue, ib.getHitMap(), Pointer.to(new int[]{-1}), 1, 0, params.getImageBuffer().getBufferSize(), 0, null, null);
 
         intersection.setParams(new IntersectionOperationParams(params.getScene().getSurfaces(), raysBuffers, ib));
         intersection.enqueue(queue);

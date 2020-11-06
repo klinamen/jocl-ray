@@ -9,6 +9,8 @@ public abstract class Surface {
     private float phongExp;
     private float ior;
 
+    private FloatVec4 emission = new FloatVec4();
+
     public FloatVec4 getKd() {
         return kd;
     }
@@ -51,6 +53,15 @@ public abstract class Surface {
 
     public Surface setIor(float ior) {
         this.ior = ior;
+        return this;
+    }
+
+    public FloatVec4 getEmission() {
+        return emission;
+    }
+
+    public Surface setEmission(FloatVec4 emission) {
+        this.emission = emission;
         return this;
     }
 }

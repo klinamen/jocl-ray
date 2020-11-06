@@ -53,7 +53,7 @@ public class TracingOperation extends AbstractOpenCLOperation implements OpenCLK
 
                     // reset hitmap
                     // TODO move to IntersectionOperation?
-                    clEnqueueFillBuffer(queue, ib.getHitMap(), Pointer.to(new int[]{-1}), 1, 0, params.getImageBuffer().getSize(), 0, null, null);
+                    clEnqueueFillBuffer(queue, ib.getHitMap(), Pointer.to(new int[]{-1}), 1, 0, params.getImageBuffer().getBufferSize(), 0, null, null);
 
                     // intersection test skipped for primary rays, as the intersection buffer already contains the result
                     intersection.setParams(new IntersectionOperationParams(params.getScene().getSurfaces(), raysBuffer.getRaysBuffers(), ib));

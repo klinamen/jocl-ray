@@ -69,8 +69,20 @@ public class FloatVec4 {
         return new FloatVec4(s * getX(), s * getY(), s * getZ(), s * getW());
     }
 
+    public FloatVec4 mul(FloatVec4 other){
+        return new FloatVec4(getX() * other.getX(), getY() * other.getY(), getZ() * other.getZ(), getW() * other.getW());
+    }
+
+    public FloatVec4 invert(){
+        return new FloatVec4(1/getX(), 1/getY(), 1/getZ(), 1/getW());
+    }
+
     public FloatVec4 div(float s) {
         return new FloatVec4(getX() / s, getY() / s, getZ() / s, getW() / s);
+    }
+
+    public FloatVec4 div(FloatVec4 other){
+        return new FloatVec4(getX() / other.getX(), getY() / other.getY(), getZ() / other.getZ(), getW() / other.getW());
     }
 
     public FloatVec4 minus(FloatVec4 v1) {
@@ -129,6 +141,10 @@ public class FloatVec4 {
 
     public float length() {
         return (float) Math.sqrt(getX() * getX() + getY() * getY() + getZ() * getZ() + getW() * getW());
+    }
+
+    public float maxComponent() {
+        return Math.max(Math.max(Math.max(getX(), getY()), getZ()), getW());
     }
 
     public static FloatVec4 extract(float[] aValues, int offset) {

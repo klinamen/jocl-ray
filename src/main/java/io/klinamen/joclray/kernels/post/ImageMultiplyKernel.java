@@ -31,6 +31,6 @@ public class ImageMultiplyKernel extends AbstractOpenCLKernel<ImageMultiplyKerne
 
     @Override
     protected long[] getWorkgroupSize() {
-        return new long[]{getParams().getImageBuffer().getPixels()};
+        return new long[]{getParams().getImageBuffer().getTotalPixels()};
     }
 }
