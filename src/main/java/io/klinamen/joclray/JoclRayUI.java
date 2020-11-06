@@ -1,10 +1,12 @@
 package io.klinamen.joclray;
 
-import io.klinamen.joclray.rendering.PathTracingRenderer;
+import io.klinamen.joclray.display.RadianceDisplay;
 import io.klinamen.joclray.rendering.Renderer;
-import io.klinamen.joclray.rendering.VisibilityRenderer;
+import io.klinamen.joclray.rendering.impl.PathTracingRenderer;
+import io.klinamen.joclray.rendering.impl.VisibilityRenderer;
 import io.klinamen.joclray.samples.Scene5;
 import io.klinamen.joclray.scene.Scene;
+import io.klinamen.joclray.tonemapping.ReinhardToneMapping;
 import picocli.CommandLine;
 
 import javax.imageio.ImageIO;
@@ -13,16 +15,19 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.util.function.Consumer;
 
 import static picocli.CommandLine.*;
 
 @Command(name = "joclrayui", mixinStandardHelpOptions = true, version = "JOCLRay v1.0")
 public class JoclRayUI implements Runnable {
     private BufferedImage image;
+    private float[] radiance;
 
     private String imageSize;
+
+    private JLabel outputLabel;
 
     @Option(names = {"-p", "--platform"}, description = "Index of the OpenCL platform to use (default: ${DEFAULT-VALUE}).")
     private int platformIndex = 0;
@@ -76,7 +81,7 @@ public class JoclRayUI implements Runnable {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridwidth = GridBagConstraints.REMAINDER;
 
-        JLabel outputLabel = new JLabel(new ImageIcon(image));
+        outputLabel = new JLabel(new ImageIcon(image));
         mainPanel.add(outputLabel, gbc);
 
         outputLabel.addMouseListener(new MouseListener() {
@@ -115,7 +120,7 @@ public class JoclRayUI implements Runnable {
         btRender.setText("Render");
         btRender.addActionListener(actionEvent -> {
             render(scene);
-            outputLabel.repaint();
+            display();
         });
         mainPanel.add(btRender, gbc);
 
@@ -127,38 +132,88 @@ public class JoclRayUI implements Runnable {
             fileChooser.setDialogTitle("Save image");
             fileChooser.setSelectedFile(new File("render.png"));
 
-            int userSelection = fileChooser.showSaveDialog(frame);
-            if (userSelection == JFileChooser.APPROVE_OPTION) {
-                boolean doWrite = true;
-                File fileToSave = fileChooser.getSelectedFile();
-                if (fileToSave.exists()) {
-                    int result = JOptionPane.showConfirmDialog(
-                            frame,
-                            "File exists, overwrite?", "File exists",
-                            JOptionPane.YES_NO_CANCEL_OPTION);
-                    switch (result) {
-                        case JOptionPane.YES_OPTION:
-                            break;
-                        default:
-                            doWrite = false;
-                    }
+            saveWithConfirm(fileChooser, frame, fileToSave -> {
+                try {
+                    ImageIO.write(image, "PNG", fileToSave);
+                } catch (IOException e) {
+                    throw new RuntimeException(String.format("Error saving image to %s: %s", fileToSave.getAbsolutePath(), e.getMessage()), e);
                 }
-
-                if (doWrite) {
-                    try {
-                        ImageIO.write(image, "PNG", fileToSave);
-                    } catch (IOException e) {
-                        throw new RuntimeException(String.format("Error saving image to %s: %s", fileToSave.getAbsolutePath(), e.getMessage()), e);
-                    }
-                }
-            }
+            });
         });
 
         mainPanel.add(btSave, gbc);
 
+        // Save Radiance button
+        JButton btSaveRadiance = new JButton();
+        btSaveRadiance.setText("Save Radiance...");
+        btSaveRadiance.addActionListener(actionEvent -> {
+            if (radiance == null) {
+                return;
+            }
+
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setDialogTitle("Save radiance buffer");
+            fileChooser.setSelectedFile(new File("radiance.bin"));
+
+            saveWithConfirm(fileChooser, frame, fileToSave -> {
+                try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(fileToSave))) {
+                    outputStream.writeObject(radiance);
+                } catch (IOException e) {
+                    throw new RuntimeException(String.format("Error saving radiance buffer to %s: %s", fileToSave.getAbsolutePath(), e.getMessage()), e);
+                }
+            });
+        });
+
+        mainPanel.add(btSaveRadiance, gbc);
+
+        // Load Radiance button
+        JButton btLoadRadiance = new JButton();
+        btLoadRadiance.setText("Load Radiance...");
+        btLoadRadiance.addActionListener(actionEvent -> {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setDialogTitle("Load radiance buffer");
+
+            int userSelection = fileChooser.showOpenDialog(frame);
+            if (userSelection == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = fileChooser.getSelectedFile();
+                try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(selectedFile))) {
+                    radiance = (float[])inputStream.readObject();
+                    display();
+                } catch (IOException | ClassNotFoundException e) {
+                    throw new RuntimeException(String.format("Error loading radiance buffer from %s: %s", selectedFile.getAbsolutePath(), e.getMessage()), e);
+                }
+            }
+        });
+
+        mainPanel.add(btLoadRadiance, gbc);
+
         frame.add(mainPanel, BorderLayout.CENTER);
         frame.pack();
         frame.setVisible(true);
+    }
+
+    private void saveWithConfirm(JFileChooser fileChooser, JFrame frame, Consumer<File> saveAction) {
+        int userSelection = fileChooser.showSaveDialog(frame);
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            boolean doWrite = true;
+            File fileToSave = fileChooser.getSelectedFile();
+            if (fileToSave.exists()) {
+                int result = JOptionPane.showConfirmDialog(
+                        frame,
+                        "File exists, overwrite?", "File exists",
+                        JOptionPane.YES_NO_CANCEL_OPTION);
+                switch (result) {
+                    case JOptionPane.YES_OPTION:
+                        break;
+                    default:
+                        doWrite = false;
+                }
+            }
+
+            if (doWrite) {
+                saveAction.accept(fileToSave);
+            }
+        }
     }
 
     private Scene buildScene() {
@@ -181,7 +236,7 @@ public class JoclRayUI implements Runnable {
                 return new VisibilityRenderer(platformIndex, deviceIndex);
             case Shading:
 //                return new DistributionRayTracerRenderer(platformIndex, deviceIndex, 2, 16);
-                return new PathTracingRenderer(platformIndex, deviceIndex, 4096, 4);
+                return new PathTracingRenderer(platformIndex, deviceIndex, 32, 4);
         }
 
         throw new UnsupportedOperationException("Unsupported renderer type: " + rendererType);
@@ -190,7 +245,7 @@ public class JoclRayUI implements Runnable {
     private void render(Scene scene) {
         Renderer renderer = getRenderer();
 
-        renderer.render(scene, image);
+        radiance = renderer.render(scene);
 
         if (renderer instanceof AutoCloseable) {
             try {
@@ -198,6 +253,15 @@ public class JoclRayUI implements Runnable {
             } catch (Exception e) {
                 throw new RuntimeException(String.format("Error closing renderer: %s", e.getMessage()), e);
             }
+        }
+    }
+
+    private void display() {
+        new RadianceDisplay(new ReinhardToneMapping())
+                .display(radiance, image);
+
+        if (outputLabel != null) {
+            outputLabel.repaint();
         }
     }
 

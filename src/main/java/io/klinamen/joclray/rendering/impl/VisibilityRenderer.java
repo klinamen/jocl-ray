@@ -1,6 +1,5 @@
-package io.klinamen.joclray.rendering;
+package io.klinamen.joclray.rendering.impl;
 
-import io.klinamen.joclray.display.IntersectionsDisplay;
 import io.klinamen.joclray.kernels.casting.RaysBuffers;
 import io.klinamen.joclray.kernels.casting.RaysGenerationResult;
 import io.klinamen.joclray.kernels.casting.ViewRaysKernel;
@@ -10,11 +9,11 @@ import io.klinamen.joclray.kernels.intersection.IntersectionKernelBuffers;
 import io.klinamen.joclray.kernels.intersection.IntersectionOperation;
 import io.klinamen.joclray.kernels.intersection.IntersectionOperationParams;
 import io.klinamen.joclray.kernels.intersection.factory.RegistryIntersectionKernelFactory;
+import io.klinamen.joclray.rendering.AbstractOpenCLRenderer;
 import io.klinamen.joclray.scene.Scene;
+import io.klinamen.joclray.util.FloatVec4;
 
-import java.awt.image.BufferedImage;
-
-public class VisibilityRenderer extends OpenCLRenderer {
+public class VisibilityRenderer extends AbstractOpenCLRenderer {
     public VisibilityRenderer() {
     }
 
@@ -23,12 +22,12 @@ public class VisibilityRenderer extends OpenCLRenderer {
     }
 
     @Override
-    protected void doRender(Scene scene, BufferedImage outImage) {
+    protected float[] doRender(Scene scene) {
         final int nPixels = scene.getCamera().getPixels();
 
         RaysGenerationResult rays = new RaysGenerationResult(nPixels);
         RaysBuffers raysBuffers = RaysBuffers.create(getContext(), rays);
-        ViewRaysKernelParams viewRaysKernelParams = new ViewRaysKernelParams(outImage.getWidth(), outImage.getHeight(), scene.getOrigin(), scene.getCamera().getFovRad(), raysBuffers);
+        ViewRaysKernelParams viewRaysKernelParams = new ViewRaysKernelParams(scene.getCamera().getImageWidth(), scene.getCamera().getImageHeight(), scene.getOrigin(), scene.getCamera().getFovRad(), raysBuffers);
         ViewRaysKernel viewRaysKernel = new ViewRaysKernel(getContext());
         viewRaysKernel.setParams(viewRaysKernelParams);
 
@@ -45,7 +44,26 @@ public class VisibilityRenderer extends OpenCLRenderer {
 
         intersectionKernelBuffers.readTo(getQueue(), intersectResult);
 
-        // update image
-        new IntersectionsDisplay(scene, intersectResult).update(outImage);
+        float[] outBuffer = new float[nPixels * FloatVec4.DIM];
+
+        int[] hitMap = intersectResult.getHitMap();
+
+        int[] idToIndex = scene.getSurfaces().getIdToIndex();
+        int nSurfaces = scene.getSurfaces().size();
+
+        for (int i = 0; i < hitMap.length; i++) {
+            int hitId = hitMap[i];
+
+            float c = 0;
+            if(hitId >= 0){
+                c = 0.1f + (0.8f / nSurfaces) * idToIndex[hitId];
+            }
+
+            outBuffer[i * FloatVec4.DIM] = c;
+            outBuffer[i * FloatVec4.DIM + 1] = c;
+            outBuffer[i * FloatVec4.DIM + 2] = c;
+        }
+
+        return outBuffer;
     }
 }

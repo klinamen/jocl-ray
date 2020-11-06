@@ -3,23 +3,22 @@ package io.klinamen.joclray.rendering;
 import io.klinamen.joclray.scene.Scene;
 import org.jocl.*;
 
-import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.jocl.CL.*;
 
-public abstract class OpenCLRenderer implements Renderer, AutoCloseable {
+public abstract class AbstractOpenCLRenderer implements Renderer, AutoCloseable {
     private cl_context context;
     private cl_command_queue queue;
 
     private int platformIndex = 0;
     private int deviceIndex = 0;
 
-    public OpenCLRenderer() {
+    public AbstractOpenCLRenderer() {
     }
 
-    public OpenCLRenderer(int platformIndex, int deviceIndex) {
+    public AbstractOpenCLRenderer(int platformIndex, int deviceIndex) {
         this.platformIndex = platformIndex;
         this.deviceIndex = deviceIndex;
     }
@@ -158,16 +157,18 @@ public abstract class OpenCLRenderer implements Renderer, AutoCloseable {
     }
 
     @Override
-    public void render(Scene scene, BufferedImage outImage) {
+    public float[] render(Scene scene) {
         long startTime = System.nanoTime();
 
-        doRender(scene, outImage);
+        float[] outBuffer = doRender(scene);
 
         long elapsed = System.nanoTime() - startTime;
         System.out.println("Elapsed time: " + elapsed/1000000 + " ms");
+
+        return outBuffer;
     }
 
-    protected abstract void doRender(Scene scene, BufferedImage outImage);
+    protected abstract float[] doRender(Scene scene);
 
     @Override
     public void close() {

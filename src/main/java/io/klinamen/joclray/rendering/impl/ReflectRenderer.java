@@ -1,6 +1,5 @@
-package io.klinamen.joclray.rendering;
+package io.klinamen.joclray.rendering.impl;
 
-import io.klinamen.joclray.display.ShadingDisplay;
 import io.klinamen.joclray.kernels.casting.*;
 import io.klinamen.joclray.kernels.intersection.IntersectResult;
 import io.klinamen.joclray.kernels.intersection.IntersectionKernelBuffers;
@@ -14,12 +13,11 @@ import io.klinamen.joclray.kernels.shading.old.ShadingKernel;
 import io.klinamen.joclray.kernels.shading.old.ShadingKernelBuffers;
 import io.klinamen.joclray.kernels.shading.old.ShadingKernelParams;
 import io.klinamen.joclray.kernels.shading.old.ShadingOperation;
+import io.klinamen.joclray.rendering.AbstractOpenCLRenderer;
 import io.klinamen.joclray.scene.Scene;
 import io.klinamen.joclray.util.FloatVec4;
 
-import java.awt.image.BufferedImage;
-
-public class ReflectRenderer extends OpenCLRenderer implements AutoCloseable {
+public class ReflectRenderer extends AbstractOpenCLRenderer implements AutoCloseable {
     private final IntersectionKernelFactory intersectionKernelFactory = new RegistryIntersectionKernelFactory(getContext());
 
     private final ViewRaysKernel viewRaysKernel = new ViewRaysKernel(getContext());
@@ -39,7 +37,7 @@ public class ReflectRenderer extends OpenCLRenderer implements AutoCloseable {
     }
 
     @Override
-    protected void doRender(Scene scene, BufferedImage outImage) {
+    protected float[] doRender(Scene scene) {
         final int nPixels = scene.getCamera().getPixels();
         float[] imageBuffer = new float[nPixels * FloatVec4.DIM];
 
@@ -47,7 +45,7 @@ public class ReflectRenderer extends OpenCLRenderer implements AutoCloseable {
 
         try(RaysBuffers viewRaysBuffers = RaysBuffers.create(getContext(), rays)){
             // generate view rays
-            viewRaysKernel.setParams(new ViewRaysKernelParams(outImage.getWidth(), outImage.getHeight(), scene.getOrigin(), scene.getCamera().getFovRad(), viewRaysBuffers));
+            viewRaysKernel.setParams(new ViewRaysKernelParams(scene.getCamera().getImageWidth(), scene.getCamera().getImageHeight(), scene.getOrigin(), scene.getCamera().getFovRad(), viewRaysBuffers));
             viewRaysKernel.enqueue(getQueue());
 
             IntersectResult intersectResult = new IntersectResult(nPixels);
@@ -80,8 +78,7 @@ public class ReflectRenderer extends OpenCLRenderer implements AutoCloseable {
             }
         }
 
-        // update image
-        new ShadingDisplay(scene, imageBuffer).update(outImage);
+        return imageBuffer;
     }
 
     @Override

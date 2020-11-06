@@ -1,6 +1,5 @@
-package io.klinamen.joclray.rendering;
+package io.klinamen.joclray.rendering.impl;
 
-import io.klinamen.joclray.display.ShadingDisplay;
 import io.klinamen.joclray.kernels.casting.RaysBuffers;
 import io.klinamen.joclray.kernels.casting.ShadowRaysKernel;
 import io.klinamen.joclray.kernels.casting.ViewRaysJitterKernel;
@@ -20,12 +19,11 @@ import io.klinamen.joclray.kernels.tracing.LightingBuffers;
 import io.klinamen.joclray.kernels.tracing.SplitRaysDistKernel;
 import io.klinamen.joclray.kernels.tracing.TracingOperation;
 import io.klinamen.joclray.kernels.tracing.TracingOperationParams;
+import io.klinamen.joclray.rendering.AbstractOpenCLRenderer;
 import io.klinamen.joclray.scene.Scene;
 import io.klinamen.joclray.util.FloatVec4;
 
-import java.awt.image.BufferedImage;
-
-public class DistributionRayTracerRenderer extends OpenCLRenderer implements AutoCloseable {
+public class DistributionRayTracerRenderer extends AbstractOpenCLRenderer implements AutoCloseable {
     private final IntersectionKernelFactory intersectionKernelFactory = new RegistryIntersectionKernelFactory(getContext());
 
     private final ViewRaysJitterKernel viewRaysKernel = new ViewRaysJitterKernel(getContext());
@@ -50,7 +48,7 @@ public class DistributionRayTracerRenderer extends OpenCLRenderer implements Aut
     }
 
     @Override
-    protected void doRender(Scene scene, BufferedImage outImage) {
+    protected float[] doRender(Scene scene) {
         final int nPixels = scene.getCamera().getPixels();
         float[] outImageBuf = new float[nPixels * FloatVec4.DIM];
 
@@ -84,8 +82,7 @@ public class DistributionRayTracerRenderer extends OpenCLRenderer implements Aut
             imageBuffer.readTo(getQueue(), outImageBuf);
         }
 
-        // update image
-        new ShadingDisplay(scene, outImageBuf).update(outImage);
+        return outImageBuf;
     }
 
     private void pass(Scene scene, ImageBuffer imageBuffer, RaysBuffers viewRaysBuffers) {

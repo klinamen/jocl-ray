@@ -1,6 +1,5 @@
-package io.klinamen.joclray.rendering;
+package io.klinamen.joclray.rendering.impl;
 
-import io.klinamen.joclray.display.ShadingDisplay;
 import io.klinamen.joclray.kernels.casting.RaysBuffers;
 import io.klinamen.joclray.kernels.casting.ShadowRaysKernel;
 import io.klinamen.joclray.kernels.casting.ViewRaysKernel;
@@ -18,12 +17,11 @@ import io.klinamen.joclray.kernels.tracing.LightingBuffers;
 import io.klinamen.joclray.kernels.tracing.SplitRaysKernel;
 import io.klinamen.joclray.kernels.tracing.TracingOperation;
 import io.klinamen.joclray.kernels.tracing.TracingOperationParams;
+import io.klinamen.joclray.rendering.AbstractOpenCLRenderer;
 import io.klinamen.joclray.scene.Scene;
 import io.klinamen.joclray.util.FloatVec4;
 
-import java.awt.image.BufferedImage;
-
-public class RayTracerRenderer extends OpenCLRenderer implements AutoCloseable {
+public class RayTracerRenderer extends AbstractOpenCLRenderer implements AutoCloseable {
     private final IntersectionKernelFactory intersectionKernelFactory = new RegistryIntersectionKernelFactory(getContext());
 
     private final ViewRaysKernel viewRaysKernel = new ViewRaysKernel(getContext());
@@ -44,13 +42,13 @@ public class RayTracerRenderer extends OpenCLRenderer implements AutoCloseable {
     }
 
     @Override
-    protected void doRender(Scene scene, BufferedImage outImage) {
+    protected float[] doRender(Scene scene) {
         final int nPixels = scene.getCamera().getPixels();
         float[] outImageBuf = new float[nPixels * FloatVec4.DIM];
 
         try(RaysBuffers viewRaysBuffers = RaysBuffers.empty(getContext(), nPixels)){
             // generate view rays
-            viewRaysKernel.setParams(new ViewRaysKernelParams(outImage.getWidth(), outImage.getHeight(), scene.getOrigin(), scene.getCamera().getFovRad(), viewRaysBuffers));
+            viewRaysKernel.setParams(new ViewRaysKernelParams(scene.getCamera().getImageWidth(), scene.getCamera().getImageHeight(), scene.getOrigin(), scene.getCamera().getFovRad(), viewRaysBuffers));
             viewRaysKernel.enqueue(getQueue());
 
             try (IntersectionKernelBuffers viewRaysIntersectionsBuffers = IntersectionKernelBuffers.empty(getContext(), nPixels)) {
@@ -76,8 +74,7 @@ public class RayTracerRenderer extends OpenCLRenderer implements AutoCloseable {
             }
         }
 
-        // update image
-        new ShadingDisplay(scene, outImageBuf).update(outImage);
+        return outImageBuf;
     }
 
     @Override
