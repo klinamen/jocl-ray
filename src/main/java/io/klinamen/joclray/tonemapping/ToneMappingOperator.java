@@ -1,6 +1,8 @@
 package io.klinamen.joclray.tonemapping;
 
+import io.klinamen.joclray.util.FloatVec4;
+
 @FunctionalInterface
 public interface ToneMappingOperator {
-    int[] toneMap(float r, float g, float b);
+    FloatVec4 toneMap(FloatVec4 radiance);
 }

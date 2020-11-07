@@ -1,9 +1,11 @@
 package io.klinamen.joclray.util;
 
 import java.util.Collection;
+import java.util.function.Function;
 
 public class FloatVec4 {
-    public static int DIM = 4;
+    public static final int DIM = 4;
+    public static final FloatVec4 ONE = new FloatVec4(1,1,1,1);
 
     private final float[] v = new float[]{0, 0, 0, 0};
 
@@ -145,6 +147,12 @@ public class FloatVec4 {
 
     public float maxComponent() {
         return Math.max(Math.max(Math.max(getX(), getY()), getZ()), getW());
+    }
+
+    public FloatVec4 apply(Function<Float,Float> fn){
+        return new FloatVec4(
+                fn.apply(getX()), fn.apply(getY()), fn.apply(getZ()), fn.apply(getW())
+        );
     }
 
     public static FloatVec4 extract(float[] aValues, int offset) {

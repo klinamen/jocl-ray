@@ -21,16 +21,27 @@ public class RadianceDisplay {
         int nPixels = colors.length / FloatVec4.DIM;
 
         for (int i = 0; i < nPixels; i++) {
-            int[] pColor = toneMappingOperator.toneMap(
-                    colors[i * FloatVec4.DIM],      // R spectral radiance
-                    colors[i * FloatVec4.DIM + 1],  // G spectral radiance
-                    colors[i * FloatVec4.DIM + 2]   // B spectral radiance
-            );
+            FloatVec4 radiance = FloatVec4.extract(colors, i * FloatVec4.DIM);
+
+            // apply tone mapping
+            FloatVec4 tmRadiance = toneMappingOperator.toneMap(radiance);
+
+            if(tmRadiance.maxComponent() > 1.0f){
+                System.out.println(String.format("Overshooting rad at %d: %f, %f, %f", i, radiance.getX(), radiance.getY(), radiance.getZ()));
+            }
 
             int x = i % image.getWidth();
             int y = i / image.getWidth();
-            image.getRaster().setPixel(x, y, pColor);
+            image.getRaster().setPixel(x, y, toRgb(tmRadiance));
         }
+    }
+
+    protected int[] toRgb(FloatVec4 radiance){
+        return new int[]{
+                (int) (255 * radiance.getX()),      // R spectral radiance
+                (int) (255 * radiance.getY()),      // G spectral radiance
+                (int) (255 * radiance.getZ())       // B spectral radiance
+        };
     }
 }
 

@@ -1,16 +1,10 @@
 package io.klinamen.joclray.tonemapping;
 
+import io.klinamen.joclray.util.FloatVec4;
+
 public class ReinhardToneMapping implements ToneMappingOperator {
     @Override
-    public int[] toneMap(float r, float g, float b) {
-        return new int[]{
-                (int) (255 * transform(r)),
-                (int) (255 * transform(g)),
-                (int) (255 * transform(b))
-        };
-    }
-
-    private float transform(float v) {
-        return v / (v + 1);
+    public FloatVec4 toneMap(FloatVec4 radiance) {
+        return radiance.apply(v -> v / (v + 1));
     }
 }

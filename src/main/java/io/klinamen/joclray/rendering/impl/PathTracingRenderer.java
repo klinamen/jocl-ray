@@ -80,11 +80,11 @@ public class PathTracingRenderer extends AbstractOpenCLRenderer {
                         pathTracingKernel.enqueue(getQueue());
                     }
                 }
-
-                // Divide by the number of samples
-                imageMultiplyKernel.setParams(new ImageMultiplyKernelParams(1.0f / samples, outImageBuffer));
-                imageMultiplyKernel.enqueue(getQueue());
             }
+
+            // Divide by the number of samples
+            imageMultiplyKernel.setParams(new ImageMultiplyKernelParams(1.0f / samples, outImageBuffer));
+            imageMultiplyKernel.enqueue(getQueue());
 
             outImageBuffer.readTo(getQueue(), outImageBuf);
         }

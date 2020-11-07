@@ -6,7 +6,8 @@ import io.klinamen.joclray.rendering.impl.PathTracingRenderer;
 import io.klinamen.joclray.rendering.impl.VisibilityRenderer;
 import io.klinamen.joclray.samples.Scene5;
 import io.klinamen.joclray.scene.Scene;
-import io.klinamen.joclray.tonemapping.ReinhardToneMapping;
+import io.klinamen.joclray.tonemapping.*;
+import io.klinamen.joclray.util.FloatVec4;
 import picocli.CommandLine;
 
 import javax.imageio.ImageIO;
@@ -17,6 +18,7 @@ import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import static picocli.CommandLine.*;
 
@@ -28,6 +30,7 @@ public class JoclRayUI implements Runnable {
     private String imageSize;
 
     private JLabel outputLabel;
+    private JComboBox<ToneMappingOperatorItem> toneMappersCombo;
 
     @Option(names = {"-p", "--platform"}, description = "Index of the OpenCL platform to use (default: ${DEFAULT-VALUE}).")
     private int platformIndex = 0;
@@ -92,7 +95,17 @@ public class JoclRayUI implements Runnable {
                 SwingUtilities.convertPointFromScreen(point, mouseEvent.getComponent());
                 int x = (int) point.getX();
                 int y = (int) point.getY();
+
                 System.out.println(String.format("(x, y) = (%d, %d), pixelIndex=%d", x, y, y * image.getWidth() + x));
+
+                int pxIndex = x + y * image.getWidth();
+                if (radiance != null && pxIndex * FloatVec4.DIM < radiance.length) {
+                    float rRad = radiance[pxIndex * FloatVec4.DIM];
+                    float gRad = radiance[pxIndex * FloatVec4.DIM + 1];
+                    float bRad = radiance[pxIndex * FloatVec4.DIM + 2];
+                    System.out.println(String.format("Spectral radiance (R,G,B): %f, %f, %f", rRad, gRad, bRad));
+                }
+
             }
 
             @Override
@@ -177,7 +190,7 @@ public class JoclRayUI implements Runnable {
             if (userSelection == JFileChooser.APPROVE_OPTION) {
                 File selectedFile = fileChooser.getSelectedFile();
                 try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(selectedFile))) {
-                    radiance = (float[])inputStream.readObject();
+                    radiance = (float[]) inputStream.readObject();
                     display();
                 } catch (IOException | ClassNotFoundException e) {
                     throw new RuntimeException(String.format("Error loading radiance buffer from %s: %s", selectedFile.getAbsolutePath(), e.getMessage()), e);
@@ -186,6 +199,13 @@ public class JoclRayUI implements Runnable {
         });
 
         mainPanel.add(btLoadRadiance, gbc);
+
+        toneMappersCombo = new JComboBox<>(buildToneMapperItems());
+        toneMappersCombo.addActionListener(event -> {
+            display();
+        });
+
+        mainPanel.add(toneMappersCombo, gbc);
 
         frame.add(mainPanel, BorderLayout.CENTER);
         frame.pack();
@@ -236,7 +256,7 @@ public class JoclRayUI implements Runnable {
                 return new VisibilityRenderer(platformIndex, deviceIndex);
             case Shading:
 //                return new DistributionRayTracerRenderer(platformIndex, deviceIndex, 2, 16);
-                return new PathTracingRenderer(platformIndex, deviceIndex, 32, 4);
+                return new PathTracingRenderer(platformIndex, deviceIndex, 16384, 4);
         }
 
         throw new UnsupportedOperationException("Unsupported renderer type: " + rendererType);
@@ -257,16 +277,54 @@ public class JoclRayUI implements Runnable {
     }
 
     private void display() {
-        new RadianceDisplay(new ReinhardToneMapping())
-                .display(radiance, image);
-
-        if (outputLabel != null) {
-            outputLabel.repaint();
+        if(radiance == null){
+            return;
         }
+//        ToneMappingOperator toneMapping = new ReinhardToneMapping();
+//        ToneMappingOperator toneMapping = ExtendedReinhardToneMapping.from(radiance);
+//        ToneMappingOperator toneMapping = ReinhardLuminanceToneMapping.from(radiance);
+
+        ToneMappingOperatorItem toneMappingItem = (ToneMappingOperatorItem)toneMappersCombo.getSelectedItem();
+
+        new RadianceDisplay(toneMappingItem.get())
+                .display(radiance, image);
+        outputLabel.repaint();
     }
 
     @Override
     public void run() {
         SwingUtilities.invokeLater(this::buildUI);
+    }
+
+    private ToneMappingOperatorItem[] buildToneMapperItems() {
+        return new ToneMappingOperatorItem[]{
+                new ToneMappingOperatorItem("Clamp", () -> new ClampToneMapping()),
+                new ToneMappingOperatorItem("Reinhard (RGB)", () -> new ReinhardToneMapping()),
+                new ToneMappingOperatorItem("Extended Reinhard (RGB)", () -> ExtendedReinhardToneMapping.from(radiance)),
+                new ToneMappingOperatorItem("Extended Reinhard (Luminance)", () -> ReinhardLuminanceToneMapping.from(radiance))
+        };
+    }
+
+    public static class ToneMappingOperatorItem {
+        private final String name;
+        private final Supplier<ToneMappingOperator> supplier;
+
+        public ToneMappingOperatorItem(String name, Supplier<ToneMappingOperator> supplier) {
+            this.name = name;
+            this.supplier = supplier;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public ToneMappingOperator get() {
+            return supplier.get();
+        }
+
+        @Override
+        public String toString() {
+            return getName();
+        }
     }
 }
