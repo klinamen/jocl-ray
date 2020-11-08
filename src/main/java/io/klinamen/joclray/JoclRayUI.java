@@ -242,6 +242,7 @@ public class JoclRayUI implements Runnable {
 //        Scene scene = Scene3.build();
 //        Scene scene = Scene4.build();
         Scene scene = Scene5.build();
+//        Scene scene = Scene6.build();
 
         scene.getCamera()
                 .setFrameWidth(image.getWidth())
@@ -256,7 +257,7 @@ public class JoclRayUI implements Runnable {
                 return new VisibilityRenderer(platformIndex, deviceIndex);
             case Shading:
 //                return new DistributionRayTracerRenderer(platformIndex, deviceIndex, 2, 16);
-                return new PathTracingRenderer(platformIndex, deviceIndex, 16384, 4);
+                return new PathTracingRenderer(platformIndex, deviceIndex, 256, 4);
         }
 
         throw new UnsupportedOperationException("Unsupported renderer type: " + rendererType);

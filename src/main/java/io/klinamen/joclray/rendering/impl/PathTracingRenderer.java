@@ -59,14 +59,14 @@ public class PathTracingRenderer extends AbstractOpenCLRenderer {
             for (int i = 0; i < samples; i++) {
                 try (IntersectionKernelBuffers intersectionKernelBuffers = IntersectionKernelBuffers.empty(getContext(), raysGenerationResult.getRays());
                      RaysBuffers raysBuffers = RaysBuffers.create(getContext(), raysGenerationResult);
-                     ImageBuffer diffuseBuffer = ImageBuffer.empty(getContext(), raysGenerationResult.getRays(), 1.0f);
+                     ImageBuffer radianceBuffer = ImageBuffer.empty(getContext(), raysGenerationResult.getRays(), 1.0f);
                 ) {
                     intersectionOp.setParams(new IntersectionOperationParams(
                             scene.getSurfaces(), raysBuffers, intersectionKernelBuffers
                     ));
 
                     pathTracingKernel.setParams(new PathTracingKernelParams(
-                            raysBuffers, intersectionKernelBuffers, outImageBuffer, diffuseBuffer, diffusePropsBuffers
+                            raysBuffers, intersectionKernelBuffers, outImageBuffer, radianceBuffer, diffusePropsBuffers
                     ));
 
                     for (int j = 0; j < bounces; j++) {
