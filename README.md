@@ -122,6 +122,23 @@ GPU         | Rendering Time
 ----------- | -------------
 NVIDIA GeForce MX150    | 2.2h
 
+### Scene 5
+![Image of Scene4](./sample-images/scene5.png)
+
+- FOV (grad): 50
+- Implicit (brute-force) GPU Path Tracing: 16,384 samples per pixel, 4 bounces.
+- 1 spherical light.
+- Ashikmin-Shirley BRDF
+- Lambertian BRDF
+- Hable's filmic tone-mapping (https://64.github.io/tonemapping/#filmic-tone-mapping-operators)
+- Acceleration structure: Octrees
+
+Rendering times on my laptop (Intel(R) Core(TM) i7-8550U CPU @ 1.80GHz, 16GB RAM, NVIDIA GeForce MX150.
+
+GPU         | Rendering Time
+----------- | -------------
+NVIDIA GeForce MX150    | 90 min
+
 ## Limitations and Future Work
 - Extend the renderer to make use of multiple OpenCL devices.
 - Surfaces in the scene are grouped by type and an intersection kernel is scheduled on the GPU for each group. Thus, each GPU thread calculates intersections for a `<ray, element>` pair. However, currently, there is no reduction step to merge the results and the memory access model may lead to the corruption of the buffer holding intersections results.

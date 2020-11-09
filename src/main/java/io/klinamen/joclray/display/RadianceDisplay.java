@@ -27,7 +27,7 @@ public class RadianceDisplay {
             FloatVec4 tmRadiance = toneMappingOperator.toneMap(radiance);
 
             if(tmRadiance.maxComponent() > 1.0f){
-                System.out.println(String.format("Overshooting rad at %d: %f, %f, %f", i, radiance.getX(), radiance.getY(), radiance.getZ()));
+                System.out.println(String.format("Overshooting radiance at %d: %f, %f, %f", i, tmRadiance.getX(), tmRadiance.getY(), tmRadiance.getZ()));
             }
 
             int x = i % image.getWidth();

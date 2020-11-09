@@ -8,3 +8,4 @@ public class ReinhardToneMapping implements ToneMappingOperator {
         return radiance.apply(v -> v / (v + 1));
     }
 }
+

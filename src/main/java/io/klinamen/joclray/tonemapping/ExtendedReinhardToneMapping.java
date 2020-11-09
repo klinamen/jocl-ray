@@ -12,8 +12,8 @@ public class ExtendedReinhardToneMapping implements ToneMappingOperator {
     @Override
     public FloatVec4 toneMap(FloatVec4 radiance) {
         return radiance
-                .mul(FloatVec4.ONE.sum(radiance.div(maxRadiance.mul(maxRadiance))))
-                .div(FloatVec4.ONE.sum(radiance));
+                .mul(FloatVec4.ONE.plus(radiance.div(maxRadiance.mul(maxRadiance))))
+                .div(FloatVec4.ONE.plus(radiance));
     }
 
     public static ExtendedReinhardToneMapping from(float[] radiance) {

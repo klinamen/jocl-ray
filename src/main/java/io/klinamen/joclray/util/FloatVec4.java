@@ -5,7 +5,7 @@ import java.util.function.Function;
 
 public class FloatVec4 {
     public static final int DIM = 4;
-    public static final FloatVec4 ONE = new FloatVec4(1,1,1,1);
+    public static final FloatVec4 ONE = new FloatVec4(1, 1, 1, 1);
 
     private final float[] v = new float[]{0, 0, 0, 0};
 
@@ -63,27 +63,31 @@ public class FloatVec4 {
 //        return this;
 //    }
 
-    public FloatVec4 sum(FloatVec4 v1) {
+    public FloatVec4 plus(FloatVec4 v1) {
         return new FloatVec4(getX() + v1.getX(), getY() + v1.getY(), getZ() + v1.getZ(), getW() + v1.getW());
+    }
+
+    public FloatVec4 plus(float a) {
+        return new FloatVec4(getX() + a, getY() + a, getZ() + a, getW() + a);
     }
 
     public FloatVec4 mul(float s) {
         return new FloatVec4(s * getX(), s * getY(), s * getZ(), s * getW());
     }
 
-    public FloatVec4 mul(FloatVec4 other){
+    public FloatVec4 mul(FloatVec4 other) {
         return new FloatVec4(getX() * other.getX(), getY() * other.getY(), getZ() * other.getZ(), getW() * other.getW());
     }
 
-    public FloatVec4 invert(){
-        return new FloatVec4(1/getX(), 1/getY(), 1/getZ(), 1/getW());
+    public FloatVec4 invert() {
+        return new FloatVec4(1 / getX(), 1 / getY(), 1 / getZ(), 1 / getW());
     }
 
     public FloatVec4 div(float s) {
         return new FloatVec4(getX() / s, getY() / s, getZ() / s, getW() / s);
     }
 
-    public FloatVec4 div(FloatVec4 other){
+    public FloatVec4 div(FloatVec4 other) {
         return new FloatVec4(getX() / other.getX(), getY() / other.getY(), getZ() / other.getZ(), getW() / other.getW());
     }
 
@@ -91,12 +95,16 @@ public class FloatVec4 {
         return new FloatVec4(getX() - v1.getX(), getY() - v1.getY(), getZ() - v1.getZ(), getW() - v1.getW());
     }
 
-    public FloatVec4 copy(){
+    public FloatVec4 minus(float a) {
+        return new FloatVec4(getX() - a, getY() - a, getZ() - a, getW() - a);
+    }
+
+    public FloatVec4 copy() {
         return new FloatVec4(getX(), getY(), getZ(), getW());
     }
 
     public FloatVec4 min(FloatVec4 v1) {
-        if(v1 == null)
+        if (v1 == null)
             return this;
 
         return new FloatVec4(
@@ -108,7 +116,7 @@ public class FloatVec4 {
     }
 
     public FloatVec4 max(FloatVec4 v1) {
-        if(v1 == null)
+        if (v1 == null)
             return this;
 
         return new FloatVec4(
@@ -119,7 +127,7 @@ public class FloatVec4 {
         );
     }
 
-    public FloatVec4 abs(){
+    public FloatVec4 abs() {
         return new FloatVec4(
                 Math.abs(getX()),
                 Math.abs(getY()),
@@ -128,16 +136,16 @@ public class FloatVec4 {
         );
     }
 
-    public float dot(FloatVec4 v){
+    public float dot(FloatVec4 v) {
         return this.getX() * v.getX() + this.getY() * v.getY() + this.getZ() * v.getZ() + this.getW() * v.getW();
     }
 
-    public FloatVec4 cross(FloatVec4 v){
+    public FloatVec4 cross(FloatVec4 v) {
         return new FloatVec4(
-          this.getY() * v.getZ() - this.getZ() * v.getY(),
-          this.getZ() * v.getX() - this.getX() * v.getZ(),
-          this.getX() * v.getY() - this.getY() * v.getX(),
-          0
+                this.getY() * v.getZ() - this.getZ() * v.getY(),
+                this.getZ() * v.getX() - this.getX() * v.getZ(),
+                this.getX() * v.getY() - this.getY() * v.getX(),
+                0
         );
     }
 
@@ -149,7 +157,7 @@ public class FloatVec4 {
         return Math.max(Math.max(Math.max(getX(), getY()), getZ()), getW());
     }
 
-    public FloatVec4 apply(Function<Float,Float> fn){
+    public FloatVec4 apply(Function<Float, Float> fn) {
         return new FloatVec4(
                 fn.apply(getX()), fn.apply(getY()), fn.apply(getZ()), fn.apply(getW())
         );
@@ -171,6 +179,10 @@ public class FloatVec4 {
             i++;
         }
         return out;
+    }
+
+    public static FloatVec4 all(float v) {
+        return new FloatVec4(v, v, v, v);
     }
 
     @Override

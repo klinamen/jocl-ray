@@ -257,7 +257,7 @@ public class JoclRayUI implements Runnable {
                 return new VisibilityRenderer(platformIndex, deviceIndex);
             case Shading:
 //                return new DistributionRayTracerRenderer(platformIndex, deviceIndex, 2, 16);
-                return new PathTracingRenderer(platformIndex, deviceIndex, 256, 4);
+                return new PathTracingRenderer(platformIndex, deviceIndex, 128, 4);
         }
 
         throw new UnsupportedOperationException("Unsupported renderer type: " + rendererType);
@@ -281,13 +281,10 @@ public class JoclRayUI implements Runnable {
         if(radiance == null){
             return;
         }
-//        ToneMappingOperator toneMapping = new ReinhardToneMapping();
-//        ToneMappingOperator toneMapping = ExtendedReinhardToneMapping.from(radiance);
-//        ToneMappingOperator toneMapping = ReinhardLuminanceToneMapping.from(radiance);
 
         ToneMappingOperatorItem toneMappingItem = (ToneMappingOperatorItem)toneMappersCombo.getSelectedItem();
 
-        new RadianceDisplay(toneMappingItem.get())
+        new RadianceDisplay(new CompositeToneMapping(toneMappingItem.get(), new ClampToneMapping()))
                 .display(radiance, image);
         outputLabel.repaint();
     }
@@ -299,10 +296,11 @@ public class JoclRayUI implements Runnable {
 
     private ToneMappingOperatorItem[] buildToneMapperItems() {
         return new ToneMappingOperatorItem[]{
-                new ToneMappingOperatorItem("Clamp", () -> new ClampToneMapping()),
-                new ToneMappingOperatorItem("Reinhard (RGB)", () -> new ReinhardToneMapping()),
+                new ToneMappingOperatorItem("Clamp", ClampToneMapping::new),
+                new ToneMappingOperatorItem("Reinhard (RGB)", ReinhardToneMapping::new),
                 new ToneMappingOperatorItem("Extended Reinhard (RGB)", () -> ExtendedReinhardToneMapping.from(radiance)),
-                new ToneMappingOperatorItem("Extended Reinhard (Luminance)", () -> ReinhardLuminanceToneMapping.from(radiance))
+                new ToneMappingOperatorItem("Extended Reinhard (Luminance)", () -> ReinhardLuminanceToneMapping.from(radiance)),
+                new ToneMappingOperatorItem("Hable Filmic", HableFilmicToneOperator::new)
         };
     }
 

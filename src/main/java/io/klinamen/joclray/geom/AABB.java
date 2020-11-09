@@ -34,7 +34,7 @@ public class AABB {
 
     public FloatVec4 getCenter(){
         return vertexMin.min(vertexMax)
-            .sum(vertexMax.minus(vertexMin).abs().div(2))
+            .plus(vertexMax.minus(vertexMin).abs().div(2))
         ;
     }
 

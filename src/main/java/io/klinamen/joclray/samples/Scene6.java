@@ -128,7 +128,7 @@ public class Scene6 {
 
         for (int i = 0; i < xCount; i++) {
             for (int j = 0; j < zCount; j++) {
-                FloatVec4 pos = corner.sum(new FloatVec4(i * xSpacing, 0, j * xSpacing));
+                FloatVec4 pos = corner.plus(new FloatVec4(i * xSpacing, 0, j * xSpacing));
                 FloatVec4 mod = new FloatVec4(i % 2 == 0 ? 1.5f : 1, j % 2 == 0 ? 1.5f : 1f, (i + j) % 2 == 0 ? 1.5f : 1f);
                 addSphereLight(scene, String.format("%d_%d", i, j), pos, r, emission.mul(mod), 3f / (xCount * zCount));
             }

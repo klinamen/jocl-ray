@@ -16,7 +16,7 @@ public class ReinhardLuminanceToneMapping implements ToneMappingOperator {
         float lOld = luminance(radiance);
         float num = lOld * (1.0f + (lOld / (maxLuminance * maxLuminance)));
         float lNew = num / (1.0f + lOld);
-        return new ClampToneMapping().toneMap(changeLuminance(radiance, lNew));
+        return changeLuminance(radiance, lNew);
     }
 
     private static float luminance(FloatVec4 rgb) {
