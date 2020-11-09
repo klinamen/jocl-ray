@@ -10,7 +10,10 @@ JOCLRay is an attempt to implement basic ray tracing on GPU via OpenCL kernels, 
 - "Shading" distribution ray-tracing renderer implementing Blinn-Phong lighting model with shadows, and configurable sampling resolution for glossy reflection and transmission.
 - Octrees acceleration structure.
 - Anti-aliasing with configurable sampling resolution.
-- Thin-lens depth pf field with configurable sampling resolution.
+- Thin-lens depth of field with configurable sampling resolution.
+- Path tracing (implicit).
+- Ashikhmin-Shierley and Lambertian BRDFs.
+- HDR rendering and various tone-mapping operators.
 
 ## How to build
 
