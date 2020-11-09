@@ -128,7 +128,7 @@ NVIDIA GeForce MX150    | 2.2h
 - FOV (grad): 50
 - Implicit (brute-force) GPU Path Tracing: 16,384 samples per pixel, 4 bounces.
 - 1 spherical light.
-- Ashikmin-Shirley BRDF
+- Ashikhmin-Shirley BRDF
 - Lambertian BRDF
 - Hable's filmic tone-mapping (https://64.github.io/tonemapping/#filmic-tone-mapping-operators)
 - Acceleration structure: Octrees
