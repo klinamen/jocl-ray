@@ -1,5 +1,6 @@
 package io.klinamen.joclray.geom;
 
+import io.klinamen.joclray.materials.Material;
 import io.klinamen.joclray.util.FloatVec4;
 
 public abstract class Surface {
@@ -8,6 +9,8 @@ public abstract class Surface {
     private FloatVec4 kr = new FloatVec4();
     private float phongExp;
     private float ior;
+
+    private Material material;
 
     private FloatVec4 emission = new FloatVec4();
 
@@ -62,6 +65,15 @@ public abstract class Surface {
 
     public Surface setEmission(FloatVec4 emission) {
         this.emission = emission;
+        return this;
+    }
+
+    public Material getMaterial() {
+        return material;
+    }
+
+    public Surface setMaterial(Material material) {
+        this.material = material;
         return this;
     }
 }

@@ -21,12 +21,14 @@ public class ImageMultiplyKernel extends AbstractOpenCLKernel<ImageMultiplyKerne
     }
 
     @Override
-    protected void configureKernel(cl_kernel kernel) {
+    protected int configureKernel(cl_kernel kernel) {
 //        __kernel void image_multiply(const float weight, __global float *image);
 
         int a = 0;
         clSetKernelArg(kernel, a++, Sizeof.cl_float, Pointer.to(new float[]{getParams().getWeight()}));
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getImageBuffer().getImage()));
+
+        return a;
     }
 
     @Override

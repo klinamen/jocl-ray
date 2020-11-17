@@ -21,7 +21,7 @@ public class ViewRaysKernel extends AbstractOpenCLKernel<ViewRaysKernelParams> {
     }
 
     @Override
-    protected void configureKernel(cl_kernel kernel) {
+    protected int configureKernel(cl_kernel kernel) {
 //        __kernel void viewRays(const int2 imageSize, const float4 e, const float fov_rad,
 //                __global float4 *origin,
 //                __global float4 *direction);
@@ -32,6 +32,8 @@ public class ViewRaysKernel extends AbstractOpenCLKernel<ViewRaysKernelParams> {
         clSetKernelArg(kernel, a++, Sizeof.cl_float, Pointer.to(new float[]{getParams().getFovRad()}));
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getBuffers().getRayOrigins()));
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getBuffers().getRayDirections()));
+
+        return a;
     }
 
     @Override

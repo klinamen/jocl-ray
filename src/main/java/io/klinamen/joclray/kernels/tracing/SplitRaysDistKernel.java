@@ -51,7 +51,7 @@ public class SplitRaysDistKernel extends AbstractOpenCLKernel<SplitRaysKernelPar
     }
 
     @Override
-    protected void configureKernel(cl_kernel kernel) {
+    protected int configureKernel(cl_kernel kernel) {
 //        __kernel void split_rays_dist(
 //                __global const float4 *ray_origins,
 //                __global const float4 *ray_dirs,
@@ -95,6 +95,8 @@ public class SplitRaysDistKernel extends AbstractOpenCLKernel<SplitRaysKernelPar
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getTransmittedRaysBuffer().getRayWeights()));
 
         clSetKernelArg(kernel, a++, Sizeof.cl_ulong, Pointer.to(new long[]{seed}));
+
+        return a;
     }
 
     @Override

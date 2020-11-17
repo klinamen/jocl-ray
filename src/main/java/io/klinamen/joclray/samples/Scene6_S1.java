@@ -4,14 +4,13 @@ import io.klinamen.joclray.geom.Plane;
 import io.klinamen.joclray.geom.Sphere;
 import io.klinamen.joclray.geom.TriangleMesh;
 import io.klinamen.joclray.light.PointLight;
-import io.klinamen.joclray.materials.AshikhminShirley;
 import io.klinamen.joclray.materials.Lambertian;
 import io.klinamen.joclray.scene.Camera;
 import io.klinamen.joclray.scene.Scene;
 import io.klinamen.joclray.transformations.ejml.*;
 import io.klinamen.joclray.util.FloatVec4;
 
-public class Scene6 {
+public class Scene6_S1 {
     public static Scene build() {
         Scene scene = new Scene(new Camera()
                 .setFovGrad(50)
@@ -27,11 +26,8 @@ public class Scene6 {
                 .add("Floor", new Plane()
                         .setNormal(new FloatVec4(0, 1, 0))
                         .setPosition(new FloatVec4(0, -5, 0))
-                        .setMaterial(new AshikhminShirley()
+                        .setMaterial(new Lambertian()
                                 .setKd(new FloatVec4(0.9f, 0.6f, 0.8f))
-                                .setKr(new FloatVec4(0.8f, 0.8f, 0.8f))
-                                .setNu(10)
-                                .setNv(10000)
                         )
                 )
                 .add("Back_Wall", new Plane()
@@ -45,9 +41,6 @@ public class Scene6 {
                 .add("Left_Wall", new Plane()
                         .setNormal(new FloatVec4(1, 0, 0))
                         .setPosition(new FloatVec4(-10, 0, 0))
-//                        .setMaterial(new ProceduralWood()
-//                                .setKd(new FloatVec4(0.4f, 0.7f, 1f))
-//                        )
                         .setMaterial(new Lambertian()
                                 .setKd(new FloatVec4(0.4f, 0.7f, 1f))
                         )
@@ -69,24 +62,13 @@ public class Scene6 {
                 .add("Pearl", new Sphere()
                         .setCenter(new FloatVec4(-6, -1f, -25))
                         .setRadius(4f)
-                        .setMaterial(new AshikhminShirley()
+                        .setMaterial(new Lambertian()
                                 .setKd(new FloatVec4(0.6f, 0.7f, 0.4f))
-                                .setKr(new FloatVec4(0.2f, 0.2f, 0.2f))
-                                .setNu(10)
-                                .setNv(100000)
                         )
-//                        .setMaterial(new Lambertian()
-//                                .setKd(new FloatVec4(0.6f, 0.7f, 0.4f))
-//                        )
                 )
                 .add("Sphere_Diffuse", new Sphere()
                         .setCenter(new FloatVec4(0, -3.5f, -18))
                         .setRadius(1.5f)
-//                        .setMaterial(new Glass()
-//                                .setKr(new FloatVec4(0.2f, 0.8f, 0.8f))
-//                                .setKt(new FloatVec4(0.2f, 0.8f, 0.8f))
-//                                .setIor(IoR.WINDOW_GLASS)
-//                        )
                         .setMaterial(new Lambertian()
                                 .setKd(new FloatVec4(0.2f, 0.8f, 0.8f))
                         )

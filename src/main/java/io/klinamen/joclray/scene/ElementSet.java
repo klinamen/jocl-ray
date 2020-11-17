@@ -45,6 +45,14 @@ public class ElementSet<T extends Element> implements Iterable<T> {
         return out;
     }
 
+    public int[] getIntsById(Function<T, Integer> propSelector){
+        int[] out = new int[map.lastKey() + 1];
+        for (Map.Entry<Integer, T> entry : map.entrySet()) {
+            out[entry.getKey()] = propSelector.apply(entry.getValue());
+        }
+        return out;
+    }
+
     public float[] getFloatVec4sById(Function<T, FloatVec4> propSelector){
         float[] out = new float[(map.lastKey() + 1) * FloatVec4.DIM];
         for (Map.Entry<Integer, T> entry : map.entrySet()) {

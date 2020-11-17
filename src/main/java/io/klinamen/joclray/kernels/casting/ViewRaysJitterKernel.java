@@ -21,7 +21,7 @@ public class ViewRaysJitterKernel extends AbstractOpenCLKernel<ViewRaysJitterKer
     }
 
     @Override
-    protected void configureKernel(cl_kernel kernel) {
+    protected int configureKernel(cl_kernel kernel) {
 //        __kernel void view_rays_jitter(const float2 frameSize,
 //                              const float4 e,           // eye origin
 //                              const float fov_rad,      // field of view angle (rad)
@@ -47,6 +47,8 @@ public class ViewRaysJitterKernel extends AbstractOpenCLKernel<ViewRaysJitterKer
         clSetKernelArg(kernel, a++, Sizeof.cl_int, Pointer.to(new int[]{getParams().getEssIndex()}));
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getBuffers().getRayOrigins()));
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getBuffers().getRayDirections()));
+
+        return a;
     }
 
     @Override

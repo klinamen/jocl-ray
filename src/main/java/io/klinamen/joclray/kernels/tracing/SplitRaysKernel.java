@@ -21,7 +21,7 @@ public class SplitRaysKernel extends AbstractOpenCLKernel<SplitRaysKernelParams>
     }
 
     @Override
-    protected void configureKernel(cl_kernel kernel) {
+    protected int configureKernel(cl_kernel kernel) {
 //        __kernel void split_rays(
 //                __global const float4 *ray_origins,
 //                __global const float4 *ray_dirs,
@@ -65,6 +65,8 @@ public class SplitRaysKernel extends AbstractOpenCLKernel<SplitRaysKernelParams>
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getTransmittedRaysBuffer().getRaysBuffers().getRayOrigins()));
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getTransmittedRaysBuffer().getRaysBuffers().getRayDirections()));
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getTransmittedRaysBuffer().getRayWeights()));
+
+        return a;
     }
 
     @Override

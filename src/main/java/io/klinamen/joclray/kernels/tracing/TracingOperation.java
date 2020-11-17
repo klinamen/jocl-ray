@@ -37,6 +37,11 @@ public class TracingOperation extends AbstractOpenCLOperation implements OpenCLK
     }
 
     @Override
+    public TracingOperationParams getParams() {
+        return params;
+    }
+
+    @Override
     protected void doEnqueue(cl_command_queue queue) {
         try (TransmissionPropsBuffers transmissionPropsBuffers = TransmissionPropsBuffers.create(context, params.getScene());
              BlinnPhongMaterialPropsBuffers materialPropsBuffers = BlinnPhongMaterialPropsBuffers.create(context, params.getScene());

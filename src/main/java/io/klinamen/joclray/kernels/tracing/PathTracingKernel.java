@@ -47,7 +47,7 @@ public class PathTracingKernel extends AbstractOpenCLKernel<PathTracingKernelPar
     }
 
     @Override
-    protected void configureKernel(cl_kernel kernel) {
+    protected int configureKernel(cl_kernel kernel) {
 //        __kernel void path_tracing(
 //                __global float4 *ray_origins,
 //                __global float4 *ray_dirs,
@@ -81,6 +81,8 @@ public class PathTracingKernel extends AbstractOpenCLKernel<PathTracingKernelPar
 
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getDiffuseBuffer().getImage()));
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getImageBuffer().getImage()));
+
+        return a;
     }
 
     @Override

@@ -21,7 +21,7 @@ public class BlinnPhongKernel extends AbstractOpenCLKernel<BlinnPhongKernelParam
     }
 
     @Override
-    protected void configureKernel(cl_kernel kernel) {
+    protected int configureKernel(cl_kernel kernel) {
 //        __kernel void dl_blinn_phong(
 //                __global const float4 *ray_origins,
 //                __global const float4 *ray_dirs,
@@ -67,6 +67,8 @@ public class BlinnPhongKernel extends AbstractOpenCLKernel<BlinnPhongKernelParam
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getLightingBuffers().getLightFallout()));
 
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getImageBuffer().getImage()));
+
+        return a;
     }
 
     @Override

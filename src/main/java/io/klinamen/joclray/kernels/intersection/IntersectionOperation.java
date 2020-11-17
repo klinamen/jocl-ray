@@ -33,6 +33,11 @@ public class IntersectionOperation extends AbstractOpenCLOperation implements Op
         this.kernelsCache.clear();
     }
 
+    @Override
+    public IntersectionOperationParams getParams() {
+        return params;
+    }
+
     private Map<Class<? extends Surface>, ElementSet<SurfaceElement<Surface>>> buildSurfaceGroups() {
         Map<Class<? extends Surface>, SortedMap<Integer, SurfaceElement<Surface>>> result = new HashMap<>();
 

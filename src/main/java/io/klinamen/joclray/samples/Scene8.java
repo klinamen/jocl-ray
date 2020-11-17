@@ -5,18 +5,20 @@ import io.klinamen.joclray.geom.Sphere;
 import io.klinamen.joclray.geom.TriangleMesh;
 import io.klinamen.joclray.light.PointLight;
 import io.klinamen.joclray.materials.AshikhminShirley;
+import io.klinamen.joclray.materials.Glass;
 import io.klinamen.joclray.materials.Lambertian;
+import io.klinamen.joclray.materials.ProceduralWood;
 import io.klinamen.joclray.scene.Camera;
 import io.klinamen.joclray.scene.Scene;
 import io.klinamen.joclray.transformations.ejml.*;
 import io.klinamen.joclray.util.FloatVec4;
+import io.klinamen.joclray.util.IoR;
 
-public class Scene6 {
+public class Scene8 {
     public static Scene build() {
         Scene scene = new Scene(new Camera()
                 .setFovGrad(50)
         )
-                .setAmbientLightIntensity(0.2f)
                 .add("Ceiling", new Plane()
                         .setNormal(new FloatVec4(0, -1, 0))
                         .setPosition(new FloatVec4(0, 12, 0))
@@ -38,25 +40,8 @@ public class Scene6 {
                         .setNormal(new FloatVec4(0, 0, 1))
                         .setPosition(new FloatVec4(0, 0, -40))
                         .setMaterial(new Lambertian()
-                                .setKd(new FloatVec4(0.752f, 0.901f, 0.925f))
+                                .setKd(new FloatVec4(0.9f, 0.3f, 0.3f))
 
-                        )
-                )
-                .add("Left_Wall", new Plane()
-                        .setNormal(new FloatVec4(1, 0, 0))
-                        .setPosition(new FloatVec4(-10, 0, 0))
-//                        .setMaterial(new ProceduralWood()
-//                                .setKd(new FloatVec4(0.4f, 0.7f, 1f))
-//                        )
-                        .setMaterial(new Lambertian()
-                                .setKd(new FloatVec4(0.4f, 0.7f, 1f))
-                        )
-                )
-                .add("Right_Wall", new Plane()
-                        .setNormal(new FloatVec4(-1, 0, 0))
-                        .setPosition(new FloatVec4(10, 0, 0))
-                        .setMaterial(new Lambertian()
-                                .setKd(new FloatVec4(0.8f, 0.4f, 0.3f))
                         )
                 )
                 .add("Front_Wall", new Plane()
@@ -67,38 +52,42 @@ public class Scene6 {
                         )
                 )
                 .add("Pearl", new Sphere()
-                        .setCenter(new FloatVec4(-6, -1f, -25))
-                        .setRadius(4f)
+                        .setCenter(new FloatVec4(-8, -2f, -25))
+                        .setRadius(3f)
                         .setMaterial(new AshikhminShirley()
                                 .setKd(new FloatVec4(0.6f, 0.7f, 0.4f))
                                 .setKr(new FloatVec4(0.2f, 0.2f, 0.2f))
                                 .setNu(10)
                                 .setNv(100000)
                         )
-//                        .setMaterial(new Lambertian()
-//                                .setKd(new FloatVec4(0.6f, 0.7f, 0.4f))
-//                        )
                 )
-                .add("Sphere_Diffuse", new Sphere()
-                        .setCenter(new FloatVec4(0, -3.5f, -18))
-                        .setRadius(1.5f)
-//                        .setMaterial(new Glass()
-//                                .setKr(new FloatVec4(0.2f, 0.8f, 0.8f))
-//                                .setKt(new FloatVec4(0.2f, 0.8f, 0.8f))
-//                                .setIor(IoR.WINDOW_GLASS)
-//                        )
-                        .setMaterial(new Lambertian()
-                                .setKd(new FloatVec4(0.2f, 0.8f, 0.8f))
+                .add("Wood", new Sphere()
+                        .setCenter(new FloatVec4(8, -2f, -25))
+                        .setRadius(3f)
+                        .setMaterial(new ProceduralWood()
+                                .setKd(new FloatVec4(0.4f, 0.7f, 1f))
                         )
+                )
+                .add("Sphere_Glass", new Sphere()
+                        .setCenter(new FloatVec4(0, 0f, -25))
+                        .setRadius(4f)
+                        .setMaterial(new Glass()
+                                .setKr(new FloatVec4(1f, 1.5f, 1.5f))
+                                .setKt(new FloatVec4(1f, 1.5f, 1.5f))
+                                .setIor(IoR.WINDOW_GLASS)
+                        )
+//                        .setMaterial(new Lambertian()
+//                                .setKd(new FloatVec4(0.2f, 0.8f, 0.8f))
+//                        )
                 )
                 .add("Cube_Blue", Meshes.cube()
                         .transform(new CompositeTransformation()
                                 .add(RotateYTransformation.withGradAngle(60))
-                                .add(new ScaleTransformation(5, 7, 4))
-                                .add(new TranslateTransformation(4, -2, -20))
+                                .add(new ScaleTransformation(5, 15, 4))
+                                .add(new TranslateTransformation(3, -2, -30))
                         )
                         .setMaterial(new Lambertian()
-                                .setKd(new FloatVec4(1.2f, 1.2f, 1.2f))
+                                .setKd(new FloatVec4(1.0f, 0.5f, 1.0f))
                         )
                 )
 //                .add("Teapot", teapot()
@@ -108,7 +97,7 @@ public class Scene6 {
 //                )
                 ;
 
-        addSphereLight(scene, "Ceiling", new FloatVec4(0, 14f, -22f), 4.5f, new FloatVec4(100, 100, 100), 1.5f);
+        addSphereLight(scene, "Ceiling", new FloatVec4(0, 14f, -25f), 5f, new FloatVec4(100, 100, 100), 1.5f);
 //        addSphereLight(scene, "Front", new FloatVec4(-6, 8, 0), 4, new FloatVec4(10, 10, 10), 1.5f);
 //        addXZLightsArray(scene, 30, 30, 4, 4, new FloatVec4(-15f, 15.8f, -45f));
 

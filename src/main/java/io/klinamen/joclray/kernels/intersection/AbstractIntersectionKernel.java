@@ -19,7 +19,7 @@ public abstract class AbstractIntersectionKernel<T extends Surface> extends Abst
     protected abstract void setAdditionalKernelArgs(int i, cl_kernel kernel);
 
     @Override
-    protected void configureKernel(cl_kernel kernel) {
+    protected int configureKernel(cl_kernel kernel) {
 //        __kernel void XIntersect(
 //                const float4 rayOrigin,
 //                __global float4 *rayDirections,
@@ -36,6 +36,8 @@ public abstract class AbstractIntersectionKernel<T extends Surface> extends Abst
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getIntersectionBuffers().getHitMap()));
 
         setAdditionalKernelArgs(a, kernel);
+
+        return a;
     }
 
     @Override

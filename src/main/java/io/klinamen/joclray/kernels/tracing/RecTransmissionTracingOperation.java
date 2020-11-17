@@ -34,6 +34,11 @@ public class RecTransmissionTracingOperation extends AbstractOpenCLOperation imp
     }
 
     @Override
+    public TracingOperationParams getParams() {
+        return params;
+    }
+
+    @Override
     protected void doEnqueue(cl_command_queue queue) {
         try (BlinnPhongMaterialPropsBuffers materialPropsBuffers = BlinnPhongMaterialPropsBuffers.create(context, params.getScene());
              TransmissionPropsBuffers transmissionPropsBuffers = TransmissionPropsBuffers.create(context, params.getScene())

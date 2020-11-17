@@ -1,4 +1,4 @@
-// #define DEBUG_RAY 847750
+// #define DEBUG_RAY 1348076
 
 __kernel void sphereIntersect(__global float4 *rayOrigins,
                               __global float4 *rayDirections,

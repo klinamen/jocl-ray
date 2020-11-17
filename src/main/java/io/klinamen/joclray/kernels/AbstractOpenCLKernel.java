@@ -41,7 +41,7 @@ public abstract class AbstractOpenCLKernel<TParams> extends AbstractOpenCLOperat
         releaseKernel();
     }
 
-    protected TParams getParams() {
+    public TParams getParams() {
         return kernelParams;
     }
 
@@ -101,9 +101,17 @@ public abstract class AbstractOpenCLKernel<TParams> extends AbstractOpenCLOperat
         return kernel;
     }
 
-    protected abstract void configureKernel(cl_kernel kernel);
+    protected abstract int configureKernel(cl_kernel kernel);
 
     protected abstract long[] getWorkgroupSize();
+
+    protected long[] getGlobalOffset(){
+        return null;
+    }
+
+    protected long[] getLocalWorkSize(){
+        return null;
+    }
 
     @Override
     public void doEnqueue(cl_command_queue queue) {
@@ -111,8 +119,8 @@ public abstract class AbstractOpenCLKernel<TParams> extends AbstractOpenCLOperat
         long[] global_work_size = getWorkgroupSize();
 
         // Execute the kernel
-        clEnqueueNDRangeKernel(queue, getKernel(), global_work_size.length, null,
-                global_work_size, null, 0, null, null);
+        clEnqueueNDRangeKernel(queue, getKernel(), global_work_size.length, getGlobalOffset(),
+                global_work_size, getLocalWorkSize(), 0, null, null);
     }
 
     @Override

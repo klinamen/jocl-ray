@@ -9,6 +9,7 @@ import io.klinamen.joclray.util.IoR;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class Scene {
     private final Camera camera;
@@ -48,6 +49,15 @@ public class Scene {
 
     public ElementSet<SurfaceElement<Surface>> getSurfaces(){
         return getSurfaceSetByType(Surface.class);
+    }
+
+    public ElementSet<SurfaceElement<? extends Surface>> getSurfaces(Predicate<Surface> filter){
+        ImmutableSortedMap<Integer, SurfaceElement<? extends Surface>> surfaceMap = elements.values().stream()
+                .filter(x -> x instanceof SurfaceElement)
+                .map(x -> (SurfaceElement<? extends Surface>) x)
+                .filter(x -> filter.test(x.getSurface()))
+                .collect(ImmutableSortedMap.toImmutableSortedMap(Integer::compare, Element::getId, Function.identity()));
+        return new ElementSet<>(surfaceMap);
     }
 
     public <T extends Surface> ElementSet<SurfaceElement<T>> getSurfaceSetByType(Class<T> clazz){

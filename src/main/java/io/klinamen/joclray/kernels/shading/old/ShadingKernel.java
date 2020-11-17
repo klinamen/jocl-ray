@@ -21,7 +21,7 @@ public class ShadingKernel extends AbstractOpenCLKernel<ShadingKernelParams> {
     }
 
     @Override
-    protected void configureKernel(cl_kernel kernel) {
+    protected int configureKernel(cl_kernel kernel) {
 //        __kernel void shading(__global float4 *rayOrigin, __global float4 *rayDirections,
 //                __global float4 *hitNormals, __global float *hitDistance,
 //                __global int *hitMap, const float aLightIntensity,
@@ -53,6 +53,8 @@ public class ShadingKernel extends AbstractOpenCLKernel<ShadingKernelParams> {
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(buffers.getLightFallout()));
         clSetKernelArg(kernel, a++, Sizeof.cl_int, Pointer.to(new int[]{getParams().getTotalLights()}));
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(buffers.getImage()));
+
+        return a;
     }
 
     @Override

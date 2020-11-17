@@ -3,6 +3,7 @@ package io.klinamen.joclray.rendering;
 import io.klinamen.joclray.scene.Scene;
 import org.jocl.*;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -70,6 +71,11 @@ public abstract class AbstractOpenCLRenderer implements Renderer, AutoCloseable 
 
         cl_device_id[] platformDevices = devicesByPlatform.get(platformIndex);
         cl_device_id device = platformDevices[deviceIndex];
+
+        System.out.println("Properties of: " + getDeviceDesc(device));
+        System.out.println("  CL_DEVICE_MAX_WORK_GROUP_SIZE = " + Arrays.toString(getInts(device, CL_DEVICE_MAX_WORK_GROUP_SIZE)));
+
+        System.out.println("---");
 
         // Initialize the context properties
         cl_context_properties contextProperties = new cl_context_properties();
@@ -154,6 +160,39 @@ public abstract class AbstractOpenCLRenderer implements Renderer, AutoCloseable 
         clGetDeviceInfo(device, paramName,
                 buffer.length, Pointer.to(buffer), null);
         return new String(buffer, 0, buffer.length - 1);
+    }
+
+    private int getInt(cl_device_id device, int paramName)
+    {
+        return getInts(device, paramName, 1)[0];
+    }
+
+    /**
+     * Returns the values of the device info parameter with the given name
+     *
+     * @param device The device
+     * @param paramName The parameter name
+     * @param numValues The number of values
+     * @return The value
+     */
+    private int[] getInts(cl_device_id device, int paramName, int numValues)
+    {
+        int values[] = new int[numValues];
+        clGetDeviceInfo(device, paramName, Sizeof.cl_int * numValues, Pointer.to(values), null);
+        return values;
+    }
+
+    private int[] getInts(cl_device_id device, int paramName)
+    {
+        long paramSize = getParamSize(device, paramName);
+        return getInts(device, paramName, (int)paramSize);
+    }
+
+    private long getParamSize(cl_device_id device, int paramName)
+    {
+        long[] size = new long[1];
+        clGetDeviceInfo(device, paramName, 0, null, size);
+        return size[0];
     }
 
     @Override

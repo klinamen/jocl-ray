@@ -19,7 +19,7 @@ public class ShadowRaysKernel extends AbstractOpenCLKernel<ShadowRaysKernelParam
     }
 
     @Override
-    protected void configureKernel(cl_kernel kernel) {
+    protected int configureKernel(cl_kernel kernel) {
 //        __kernel void shadowRays(__global float4 *rayOrigin, __global float4 *rayDirections,
 //                __global float4 *hitNormals, __global float *hitDistance,
 //                __global int *hitMap, __global float4 *lightPos,
@@ -36,6 +36,8 @@ public class ShadowRaysKernel extends AbstractOpenCLKernel<ShadowRaysKernelParam
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(lightPos));
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getShadowRaysBuffers().getRayOrigins()));
         clSetKernelArg(kernel, a++, Sizeof.cl_mem, Pointer.to(getParams().getShadowRaysBuffers().getRayDirections()));
+
+        return a;
     }
 
     @Override

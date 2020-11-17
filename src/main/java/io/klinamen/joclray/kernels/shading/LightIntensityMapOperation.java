@@ -34,6 +34,11 @@ public class LightIntensityMapOperation extends AbstractOpenCLOperation implemen
     }
 
     @Override
+    public LightIntensityMapOperationParams getParams() {
+        return params;
+    }
+
+    @Override
     protected void doEnqueue(cl_command_queue queue) {
         final int rays = params.getViewRaysBuffer().getRays();
 

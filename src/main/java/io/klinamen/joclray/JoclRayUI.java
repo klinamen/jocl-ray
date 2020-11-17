@@ -2,9 +2,9 @@ package io.klinamen.joclray;
 
 import io.klinamen.joclray.display.RadianceDisplay;
 import io.klinamen.joclray.rendering.Renderer;
-import io.klinamen.joclray.rendering.impl.PathTracingRenderer;
+import io.klinamen.joclray.rendering.impl.SeparatePathTracingRenderer;
 import io.klinamen.joclray.rendering.impl.VisibilityRenderer;
-import io.klinamen.joclray.samples.Scene5;
+import io.klinamen.joclray.samples.Scene6_S4;
 import io.klinamen.joclray.scene.Scene;
 import io.klinamen.joclray.tonemapping.*;
 import io.klinamen.joclray.util.FloatVec4;
@@ -17,6 +17,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.util.Arrays;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -241,8 +242,14 @@ public class JoclRayUI implements Runnable {
 //        Scene scene = Scene2.build();
 //        Scene scene = Scene3.build();
 //        Scene scene = Scene4.build();
-        Scene scene = Scene5.build();
+//        Scene scene = Scene5.build();
 //        Scene scene = Scene6.build();
+//        Scene scene = Scene8.build();
+
+//        Scene scene = Scene6_S1.build();
+//        Scene scene = Scene6_S2.build();
+//        Scene scene = Scene6_S3.build();
+        Scene scene = Scene6_S4.build();
 
         scene.getCamera()
                 .setFrameWidth(image.getWidth())
@@ -257,7 +264,8 @@ public class JoclRayUI implements Runnable {
                 return new VisibilityRenderer(platformIndex, deviceIndex);
             case Shading:
 //                return new DistributionRayTracerRenderer(platformIndex, deviceIndex, 2, 16);
-                return new PathTracingRenderer(platformIndex, deviceIndex, 128, 4);
+//                return new PathTracingRenderer(platformIndex, deviceIndex, 4, 2);
+            return new SeparatePathTracingRenderer(platformIndex, deviceIndex, 4, 8);
         }
 
         throw new UnsupportedOperationException("Unsupported renderer type: " + rendererType);
@@ -266,7 +274,19 @@ public class JoclRayUI implements Runnable {
     private void render(Scene scene) {
         Renderer renderer = getRenderer();
 
-        radiance = renderer.render(scene);
+        long[] runtimes = new long[5];
+        for(int i=0; i<runtimes.length; i++) {
+            long startTime = System.nanoTime();
+            radiance = renderer.render(scene);
+            runtimes[i] = System.nanoTime() - startTime;
+        }
+
+        long min = Arrays.stream(runtimes).min().getAsLong();
+        long max = Arrays.stream(runtimes).max().getAsLong();
+        double average = Arrays.stream(runtimes).average().getAsDouble();
+
+        System.out.println(Arrays.toString(runtimes));
+        System.out.println(String.format("min: %d, max: %d, avg: %f", min, max, average));
 
         if (renderer instanceof AutoCloseable) {
             try {

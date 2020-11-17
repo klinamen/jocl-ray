@@ -6,12 +6,13 @@ import io.klinamen.joclray.geom.TriangleMesh;
 import io.klinamen.joclray.light.PointLight;
 import io.klinamen.joclray.materials.AshikhminShirley;
 import io.klinamen.joclray.materials.Lambertian;
+import io.klinamen.joclray.materials.ProceduralWood;
 import io.klinamen.joclray.scene.Camera;
 import io.klinamen.joclray.scene.Scene;
 import io.klinamen.joclray.transformations.ejml.*;
 import io.klinamen.joclray.util.FloatVec4;
 
-public class Scene6 {
+public class Scene6_S3 {
     public static Scene build() {
         Scene scene = new Scene(new Camera()
                 .setFovGrad(50)
@@ -45,10 +46,7 @@ public class Scene6 {
                 .add("Left_Wall", new Plane()
                         .setNormal(new FloatVec4(1, 0, 0))
                         .setPosition(new FloatVec4(-10, 0, 0))
-//                        .setMaterial(new ProceduralWood()
-//                                .setKd(new FloatVec4(0.4f, 0.7f, 1f))
-//                        )
-                        .setMaterial(new Lambertian()
+                        .setMaterial(new ProceduralWood()
                                 .setKd(new FloatVec4(0.4f, 0.7f, 1f))
                         )
                 )
@@ -75,18 +73,10 @@ public class Scene6 {
                                 .setNu(10)
                                 .setNv(100000)
                         )
-//                        .setMaterial(new Lambertian()
-//                                .setKd(new FloatVec4(0.6f, 0.7f, 0.4f))
-//                        )
                 )
                 .add("Sphere_Diffuse", new Sphere()
                         .setCenter(new FloatVec4(0, -3.5f, -18))
                         .setRadius(1.5f)
-//                        .setMaterial(new Glass()
-//                                .setKr(new FloatVec4(0.2f, 0.8f, 0.8f))
-//                                .setKt(new FloatVec4(0.2f, 0.8f, 0.8f))
-//                                .setIor(IoR.WINDOW_GLASS)
-//                        )
                         .setMaterial(new Lambertian()
                                 .setKd(new FloatVec4(0.2f, 0.8f, 0.8f))
                         )
