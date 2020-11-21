@@ -14,7 +14,7 @@ public class MaterialSplitKernel extends AbstractOpenCLKernel<MaterialSplitKerne
     public static final String DEF_LOCAL_QUEUE_SIZE = "LOCAL_QUEUE_SIZE";
     public static final String DEF_GLOBAL_QUEUE_SIZE = "GLOBAL_QUEUE_SIZE";
 
-    public static final String KERNEL_NAME = "material_split";
+    public static final String KERNEL_NAME = "material_split_global";
 
     private final int nMaterials;
     private final int localQueueSize;
@@ -56,10 +56,10 @@ public class MaterialSplitKernel extends AbstractOpenCLKernel<MaterialSplitKerne
         return a;
     }
 
-    @Override
-    protected long[] getLocalWorkSize() {
-        return new long[]{localQueueSize};
-    }
+//    @Override
+//    protected long[] getLocalWorkSize() {
+//        return new long[]{localQueueSize};
+//    }
 
     @Override
     protected long[] getWorkgroupSize() {

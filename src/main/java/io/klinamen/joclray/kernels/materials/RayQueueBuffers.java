@@ -47,7 +47,7 @@ public class RayQueueBuffers extends KernelBuffersPool {
     }
 
     public void clearQueueIndexBuf(cl_command_queue cmdQueue){
-        clEnqueueFillBuffer(cmdQueue, queueIndex, Pointer.to(new int[]{0}), 1, 0, numQueues * Sizeof.cl_int, 0, null, null);
+        clEnqueueFillBuffer(cmdQueue, queueIndex, Pointer.to(new int[]{0}), Sizeof.cl_int, 0, numQueues * Sizeof.cl_int, 0, null, null);
     }
 
     public static RayQueueBuffers create(cl_context context, int nQueues, int queueSize) {

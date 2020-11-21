@@ -4,7 +4,7 @@ import io.klinamen.joclray.display.RadianceDisplay;
 import io.klinamen.joclray.rendering.Renderer;
 import io.klinamen.joclray.rendering.impl.SeparatePathTracingRenderer;
 import io.klinamen.joclray.rendering.impl.VisibilityRenderer;
-import io.klinamen.joclray.samples.Scene6_S4;
+import io.klinamen.joclray.samples.Scene6_G;
 import io.klinamen.joclray.scene.Scene;
 import io.klinamen.joclray.tonemapping.*;
 import io.klinamen.joclray.util.FloatVec4;
@@ -249,7 +249,10 @@ public class JoclRayUI implements Runnable {
 //        Scene scene = Scene6_S1.build();
 //        Scene scene = Scene6_S2.build();
 //        Scene scene = Scene6_S3.build();
-        Scene scene = Scene6_S4.build();
+//        Scene scene = Scene6_S4.build();
+//        Scene scene = Scene6_S5.build();
+
+        Scene scene = Scene6_G.build();
 
         scene.getCamera()
                 .setFrameWidth(image.getWidth())
@@ -264,8 +267,8 @@ public class JoclRayUI implements Runnable {
                 return new VisibilityRenderer(platformIndex, deviceIndex);
             case Shading:
 //                return new DistributionRayTracerRenderer(platformIndex, deviceIndex, 2, 16);
-//                return new PathTracingRenderer(platformIndex, deviceIndex, 4, 2);
-            return new SeparatePathTracingRenderer(platformIndex, deviceIndex, 4, 8);
+//                return new PathTracingRenderer(platformIndex, deviceIndex, 128, 4);
+            return new SeparatePathTracingRenderer(platformIndex, deviceIndex, 128, 4);
         }
 
         throw new UnsupportedOperationException("Unsupported renderer type: " + rendererType);
@@ -274,7 +277,7 @@ public class JoclRayUI implements Runnable {
     private void render(Scene scene) {
         Renderer renderer = getRenderer();
 
-        long[] runtimes = new long[5];
+        long[] runtimes = new long[1];
         for(int i=0; i<runtimes.length; i++) {
             long startTime = System.nanoTime();
             radiance = renderer.render(scene);
@@ -286,7 +289,7 @@ public class JoclRayUI implements Runnable {
         double average = Arrays.stream(runtimes).average().getAsDouble();
 
         System.out.println(Arrays.toString(runtimes));
-        System.out.println(String.format("min: %d, max: %d, avg: %f", min, max, average));
+        System.out.println(String.format("min: %d, max: %d, avg: %f, avg (s): %f", min, max, average, average/1000000000));
 
         if (renderer instanceof AutoCloseable) {
             try {

@@ -1,9 +1,9 @@
 // #define DEBUG_RAY 990679
+// #define GLOBAL_QUEUE_SIZE
 
 __kernel void material_split_global(
         __global const int *hit_map,
         __global const int *id_to_material,
-        const int queue_size,
         __global int *ray_queue,
         __global int *queue_index
         ) {
@@ -26,7 +26,7 @@ __kernel void material_split_global(
   volatile __global int* counterPtr = queue_index + hit_mat_index; 
   int old_index = atomic_inc(counterPtr);
 
-  int abs_queue_index = hit_mat_index * queue_size + old_index;
+  int abs_queue_index = hit_mat_index * GLOBAL_QUEUE_SIZE + old_index;
   ray_queue[abs_queue_index] = ray;
 
 #ifdef DEBUG_RAY
