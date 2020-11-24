@@ -13,6 +13,8 @@ JOCLRay is an attempt to implement basic ray tracing on GPU via OpenCL kernels, 
 - Thin-lens depth of field with configurable sampling resolution.
 - Path tracing (implicit).
 - Ashikhmin-Shierley and Lambertian BRDFs.
+- Specular reflective-transmissive BxDF.
+- Mega-kernel and split-kernels path tracing implementations.
 - HDR rendering and various tone-mapping operators.
 
 ## How to build
